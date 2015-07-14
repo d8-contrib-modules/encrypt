@@ -1,0 +1,9 @@
+name: Encrypt
+description: 'Provides an API for two-way encryption'
+core: 8.x
+package: Encryption
+dependencies: {  }
+version: 7.x-2.0
+project: encrypt
+datestamp: '1412192667'
+type: module

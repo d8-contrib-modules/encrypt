@@ -1,0 +1,23 @@
+encrypt.add:
+  path: '/admin/config/system/encrypt/add'
+  defaults:
+    _form: '\Drupal\encrypt\Form\EncryptAddConfigurationForm'
+    _title: 'Encrypt'
+  requirements:
+    _permission: 'administer encrypt'
+
+encrypt.list:
+  path: '/admin/config/system/encrypt'
+  defaults:
+    _controller: '\Drupal\encrypt\Controller\EncryptController::encryptConfigsList'
+    _title: 'Encrypt'
+  requirements:
+    _permission: 'administer encrypt'
+
+encrypt.make_default:
+  path: '/admin/config/system/encrypt/default/{encrypt_config}'
+  defaults:
+    _controller: '\Drupal\encrypt\Controller\EncryptController::configMakeDefault'
+    _title: 'Encrypt'
+  requirements:
+    _permission: 'administer encrypt'
