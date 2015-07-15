@@ -21,3 +21,19 @@ encrypt.make_default:
     _title: 'Encrypt'
   requirements:
     _permission: 'administer encrypt'
+
+encrypt.edit:
+  path: '/admin/config/system/encrypt/edit/{encrypt_config}'
+  defaults:
+    _form: '\Drupal\encrypt\Form\EncryptAddConfigurationForm'
+    _title: 'Encrypt'
+  requirements:
+    _permission: 'administer encrypt'
+
+encrypt.delete:
+  path: '/admin/config/system/encrypt/delete/{encrypt_config}'
+  defaults:
+    _form: '\Drupal\encrypt\Form\EncryptDeleteConfigurationConfirmForm'
+    _title: 'Encrypt'
+  requirements:
+    _permission: 'administer encrypt'

@@ -28,32 +28,46 @@ class FileKey extends PluginBase implements KeyProviderBaseInterface {
     return array();
   }
 
+  function configurationSaveHandler($form, &$form_state){
+    $directory = $form_state->getValue('encrypt_key_providers_file_settings')['path'];
+    $file = $directory . '/' . $this->ENCRYPT_FILE_NAME;
+
+    // Check for contents of file; do not write over the key.
+    if (file_exists($file) && file_get_contents($file)) {
+      return;
+    }
+
+    // Create a default key.
+    $open_file = fopen($file, 'wb');
+    $new_key = md5(uniqid(mt_rand(0, mt_rand()), TRUE)) . md5(uniqid(mt_rand(0, mt_rand()), TRUE));
+    fwrite($open_file, $new_key);
+    fclose($open_file);
+
+    // Ensure that the file is only readable and writable by owner.
+    \Drupal::service('file_system')->chmod($file, 0600);
+
+    drupal_set_message(t('The key file has been written to %file', array('%file' => $file)));
+  }
+
   /**
    * Callback method to return Drupal's private key.
    */
-  function getKey() {
-    return '';
-  }
-}
+  function getKey($settings = array()) {
+    $file_name = $settings['path'] . '/' . ENCRYPT_FILE_NAME;
+    // If the file doesn't exist, just abort.
+    if (!file_exists($file_name)) {
+      drupal_set_message(t('The file %file does not exist! Encrypt cannot retrieve encryption key.', array('%file' => $file_name)), 'error');
+      return;
+    }
 
-/**
- * Callback method to return the encryption key from a file.
- */
-function encrypt_get_file_key($settings) {
-  $file_name = $settings['path'] . '/' . ENCRYPT_FILE_NAME;
-  // If the file doesn't exist, just abort.
-  if (!file_exists($file_name)) {
-    drupal_set_message(t('The file %file does not exist! Encrypt cannot retrieve encryption key.', array('%file' => $file_name)), 'error');
-    return;
-  }
+    switch ($settings['method']) {
+      case 'file_contents':
+        return file_get_contents($file_name);
 
-  switch ($settings['method']) {
-    case 'file_contents':
-      return file_get_contents($file_name);
+      case 'md5':
+        return md5_file($file_name);
 
-    case 'md5':
-      return md5_file($file_name);
-
+    }
   }
 }
 
@@ -111,30 +125,4 @@ function encrypt_file_key_path_validate($element, &$form_state, $form) {
       '%file' => $file,
     )));
   }
-}
-
-/**
- * Submit callback for the settings form.
- */
-function encrypt_file_key_settings_form_submit($form, $form_state) {
-  $directory = $form_state['values']['encrypt_key_providers_file_settings']['path'];
-  $file = $directory . '/' . ENCRYPT_FILE_NAME;
-
-  // Check for contents of file; do not write over the key.
-  if (file_exists($file) && file_get_contents($file)) {
-    return;
-  }
-
-  // Create a default key.
-  $open_file = fopen($file, 'wb');
-  $new_key = md5(uniqid(mt_rand(0, mt_rand()), TRUE)) . md5(uniqid(mt_rand(0, mt_rand()), TRUE));
-  fwrite($open_file, $new_key);
-  fclose($open_file);
-
-  // Ensure that the file is only readable and writable by owner.
-  drupal_chmod($file, 0600);
-
-  drupal_set_message(t('The key file has been written to %file', array(
-    '%file' => $file,
-  )));
 }

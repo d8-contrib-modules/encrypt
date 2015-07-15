@@ -38,9 +38,9 @@ class EncryptAddConfigurationForm extends FormBase {
     );
   }
 
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state, $encrypt_config = NULL) {
     $default_config = \Drupal::config('encrypt.settings')->get('encrypt_default_config');
-    $config = \Drupal::config('encrypt.settings');
+    $config = encrypt_get_config($encrypt_config);
 
     $method_options = array();
     foreach ($this->encryptionMethodManager->getDefinitions() as $encryptionMethod) {
@@ -53,24 +53,19 @@ class EncryptAddConfigurationForm extends FormBase {
       $provider_options[$keyProvider['id']] = $keyProvider['title'];
     }
 
-    /*$form['#attached'] = array(
-      'css' => array(
-        drupal_get_path('module', 'encrypt') . '/encrypt.css',
-      ),
-    );*/
-
     $form['label'] = array(
       '#title' => t('Name'),
       '#type' => 'textfield',
+      '#default_value' => $config['label'],
       '#description' => t('The human-readable name of the configuration.'),
       '#required' => TRUE,
       '#size' => 30,
     );
     $form['name'] = array(
       '#type' => 'machine_name',
-      //'#default_value' => $config['name'],
+      '#default_value' => $config['name'],
       '#maxlength' => 32,
-      //'#disabled' => isset($config['name']),
+      '#disabled' => isset($config['name']),
       '#machine_name' => array(
         'exists' => 'encrypt_config_load',
         'source' => array('label'),
@@ -80,15 +75,8 @@ class EncryptAddConfigurationForm extends FormBase {
     $form['description'] = array(
       '#title' => t('Description'),
       '#type' => 'textarea',
-      //'#default_value' => $config['description'],
+      '#default_value' => $config['description'],
       '#description' => t('A short description of the configuration.'),
-    );
-
-    $form['settings'] = array(
-      '#type' => 'vertical_tabs',
-      /*'#attached' => array(
-        'js' => array(drupal_get_path('module', 'encrypt') . '/js/encrypt_admin.js'),
-      ),*/
     );
 
     $form['general_settings'] = array(
@@ -99,14 +87,14 @@ class EncryptAddConfigurationForm extends FormBase {
     $form['general_settings']['enabled'] = array(
       '#type' => 'checkbox',
       '#title' => t('Enabled'),
-      //'#default_value' => $config['enabled'],
+      '#default_value' => $config['enabled'],
       '#description' => t('If checked, this configuration will be available for encryption. The default configuration must be enabled.'),
     );
 
     // If this is the default configuration, disable the enabled checkbox.
-    //if ($config['name'] == $default_config) {
-      //$form['general_settings']['enabled']['#disabled'] = TRUE;
-    //}
+    if ($config['name'] == $default_config) {
+      $form['general_settings']['enabled']['#disabled'] = TRUE;
+    }
 
     $form['method_settings'] = array(
       '#type' => 'fieldset',
@@ -119,7 +107,7 @@ class EncryptAddConfigurationForm extends FormBase {
       '#description' => t('Define the default encryption method for the site. Since encryption methods are stored with the data, this can be changed even after you have stored encrypted data.'),
       '#required' => TRUE,
       '#options' => $method_options,
-      //'#default_value' => $config['method'],
+      '#default_value' => $config['method'],
       '#ajax' => array(
         'method' => 'replace',
         'callback' => 'encrypt_encryption_methods_additional_settings_ajax',
@@ -159,14 +147,14 @@ class EncryptAddConfigurationForm extends FormBase {
       '#description' => t('Select the method by which encrypt will retrieve an encryption key. NOTE: Once this is set, it is not a good idea to change it. All of your encrypted data may be lost if the encryption key changes.'),
       '#required' => TRUE,
       '#options' => $provider_options,
-      //'#default_value' => $config['provider'],
+      '#default_value' => $config['provider'],
       '#ajax' => array(
         'method' => 'replace',
         'callback' => 'encrypt_key_providers_additional_settings_ajax',
         'wrapper' => 'encrypt-key-providers-additional-settings',
       ),
     );
-    // Disable any method with dependency errors.
+    // Disable any provider with dependency errors.
     //$this->_encrypt_admin_form_add_options($providers, $form['provider_settings']['encrypt_key_provider']);
 
     $form['provider_settings']['key_settings_wrapper'] = array(
@@ -194,15 +182,14 @@ class EncryptAddConfigurationForm extends FormBase {
       '#value' => t('Save configuration'),
       '#weight' => 40,
     );
-    //if (isset($config['name'])) {
+    if (isset($config['name'])) {
       $form['actions']['delete'] = array(
-        '#type' => 'button',
+        '#type' => 'submit',
         '#value' => t('Delete configuration'),
-        '#submit' => array('encrypt_config_form_delete_submit'),
-        '#limit_validation_errors' => array(),
+        '#submit' => array('::encrypt_config_form_delete_submit'),
         '#weight' => 45,
       );
-    //}
+    }
 
     return $form;
   }
@@ -298,15 +285,24 @@ class EncryptAddConfigurationForm extends FormBase {
   /**
    * Callback for AJAX form re-rendering for method additional settings.
    */
-  function encrypt_encryption_methods_additional_settings_ajax($form, $form_state) {
+  function encrypt_encryption_methods_additional_settings_ajax(array &$form, FormStateInterface $form_state) {
     return $form['method_settings']['method_settings_wrapper'];
   }
 
   /**
    * Callback for AJAX form re-rendering for provider additional settings.
    */
-  function encrypt_key_providers_additional_settings_ajax($form, $form_state) {
+  function encrypt_key_providers_additional_settings_ajax(array &$form, FormStateInterface $form_state) {
     return $form['provider_settings']['key_settings_wrapper'];
+  }
+
+  /**
+   * Form submission handler for encrypt_config_form().
+   *
+   * Handles the 'Delete' button on the encryption configuration form.
+   */
+  function encrypt_config_form_delete_submit(array &$form, FormStateInterface $form_state) {
+    $form_state->setRedirect('encrypt.delete',array('encrypt_config' => $form_state->getValue('name')));
   }
 
   /**

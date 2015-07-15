@@ -66,13 +66,13 @@ class EncryptController extends ControllerBase
       // Set the edit column.
       // @FIXME
       // l() expects a Url object, created from a route name or external URI.
-      //$row[] = array('data' => l(t('edit'), ENCRYPT_MENU_PATH . '/edit/' . $config_url_str));
+      $row[] = array('data' => \Drupal::l(t('edit'), Url::fromRoute('encrypt.edit', array('encrypt_config' => $config_url_str))));
 
 
       // Set the delete column.
       // @FIXME
       // l() expects a Url object, created from a route name or external URI.
-      // $row[] = array('data' => l(t('delete'), ENCRYPT_MENU_PATH . '/delete/' . $config_url_str));
+      $row[] = array('data' => \Drupal::l(t('delete'), Url::fromRoute('encrypt.delete', array('encrypt_config' => $config_url_str))));
 
 
       // Set the make default column if this is not already the default.

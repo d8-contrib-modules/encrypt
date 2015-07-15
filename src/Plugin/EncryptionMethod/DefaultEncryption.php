@@ -25,10 +25,6 @@ class DefaultEncryption extends PluginBase implements EncryptionMethodBaseInterf
     return array();
   }
 
-  function configurationSaveHandler($form, &$form_state){
-    return TRUE;
-  }
-
   /**
    * @return mixed
    */

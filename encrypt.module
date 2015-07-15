@@ -19,8 +19,6 @@
  * module provides an easy way to encrypt() and decrypt().
  */
 
-define('ENCRYPT_MENU_PATH', 'admin/config/system/encrypt');
-
 /**
  * Implements hook_help().
  */
@@ -38,55 +36,6 @@ function encrypt_help($path, $arg) {
 }
 
 /**
- * Implements hook_menu().
- */
-function encrypt_menu() {
-  $items = array();
-
-  $items[ENCRYPT_MENU_PATH . '/list'] = array(
-    'title' => 'List configurations',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
-  );
-  $items[ENCRYPT_MENU_PATH . '/edit/%encrypt_config'] = array(
-    'title' => 'Edit encryption configuration',
-    'title callback' => 'encrypt_config_edit_title',
-    'title arguments' => array(5),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('encrypt_config_form', 5),
-    'access arguments' => array('administer encrypt'),
-    'file' => 'includes/encrypt.admin.inc',
-  );
-  /*$items[ENCRYPT_MENU_PATH . '/default/%encrypt_config'] = array(
-    'page callback' => 'encrypt_config_make_default',
-    'page arguments' => array(5),
-    'access arguments' => array('administer encrypt'),
-    'file' => 'includes/encrypt.admin.inc',
-  );*/
-  $items[ENCRYPT_MENU_PATH . '/delete/%encrypt_config'] = array(
-    'title' => 'Delete encryption configuration',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('encrypt_config_delete_confirm', 5),
-    'access arguments' => array('administer encrypt'),
-    'file' => 'includes/encrypt.admin.inc',
-  );
-
-  return $items;
-}
-
-/**
- * Implements hook_permission().
- */
-function encrypt_permission() {
-  return array(
-    'administer encrypt' => array(
-      'title' => t('Administer encryption settings'),
-      'description' => 'Change encryption settings (does not let them view encrypted data).',
-    ),
-  );
-}
-
-/**
  * Implements hook_theme().
  */
 function encrypt_theme() {
@@ -100,45 +49,6 @@ function encrypt_theme() {
       'file' => 'includes/encrypt.admin.inc',
     ),
   );
-}
-
-/**
- * Implements hook_ctools_plugin_type().
- *
- * Tell ctools about our plugin types.
- */
-function encrypt_ctools_plugin_type() {
-  $plugins = array();
-
-  $plugins['encryption_methods'] = array(
-    'cache' => TRUE,
-    'cache table' => 'cache',
-    'process' => '_encrypt_plugin_process',
-    'defaults' => array(
-      'title' => '',
-      'description' => '',
-      'encrypt callback' => NULL,
-      'dependency callback' => NULL,
-      'dependency errors' => NULL,
-      'settings form' => NULL,
-    ),
-  );
-  $plugins['key_providers'] = array(
-    'cache' => TRUE,
-    'cache table' => 'cache',
-    'process' => '_encrypt_plugin_process',
-    'defaults' => array(
-      'title' => '',
-      'description' => '',
-      'key callback' => NULL,
-      'dependency callback' => NULL,
-      'dependency errors' => NULL,
-      'settings form' => NULL,
-      'static key' => TRUE,
-    ),
-  );
-
-  return $plugins;
 }
 
 /**
@@ -481,18 +391,6 @@ function _encrypt_plugin_is_valid($plugin) {
 }
 
 /**
- * Helper function to clear encrypt plugin caches.
- */
-function _encrypt_clear_plugin_cache($type = NULL) {
-  if ($type) {
-    cache_clear_all("plugins:encrypt:$type", 'cache');
-  }
-  else {
-    cache_clear_all('plugins:encrypt:', 'cache', TRUE);
-  }
-}
-
-/**
  * Encrypt text.
  *
  * @param string $text
@@ -542,17 +440,6 @@ function encrypt($text = '', $options = array(), $method = NULL, $key_provider =
 function decrypt($text = '', $options = array(), $method = NULL, $key_provider = NULL, $config = NULL) {
   module_load_include('inc', 'encrypt', 'includes/encrypt.encrypt');
   return _encrypt_decrypt('decrypt', $text, $options, $method, $key_provider, $config);
-}
-
-/**
- * Implements hook_ctools_plugin_directory().
- *
- * Tell ctools about our plugins.
- */
-function encrypt_ctools_plugin_directory($module, $plugin) {
-  if ($module == 'encrypt') {
-    return 'plugins/' . $plugin;
-  }
 }
 
 /**
