@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\Core\Block\Annotation\Block.
+ * Contains \Drupal\encrypt\Annotation\KeyProvider.
  */
 
 namespace  Drupal\encrypt\Annotation;

@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\Core\Block\Annotation\Block.
+ * Contains \Drupal\encrypt\Annotation\EncryptionMethod.
  */
 
 namespace  Drupal\encrypt\Annotation;

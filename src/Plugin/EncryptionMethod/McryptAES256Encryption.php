@@ -2,7 +2,6 @@
 
 namespace Drupal\encrypt\Plugin\EncryptionMethod;
 
-use Drupal\encrypt\Annotation\EncryptionMethod;
 use Drupal\encrypt\EncryptionMethodBaseInterface;
 use Drupal\Core\Plugin\PluginBase;
 

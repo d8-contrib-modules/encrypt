@@ -2,7 +2,6 @@
 
 namespace Drupal\encrypt\Plugin\KeyProvider;
 
-use Drupal\encrypt\Annotation\KeyProvider;
 use Drupal\encrypt\KeyProviderBaseInterface;
 use Drupal\Core\Plugin\PluginBase;
 
