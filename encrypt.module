@@ -285,7 +285,7 @@ function encrypt_get_key_provider($provider = NULL) {
 // @see https://www.drupal.org/node/2164623
 // ctools_include('plugins');
 
-  return \Drupal::service('plugin.manager.encrypt.key_providers')->getDefinitions();
+  return \Drupal::service('plugin.manager.key.key_type')->getDefinitions();
 }
 
 /**
@@ -312,7 +312,7 @@ function encrypt_get_key_providers($all = TRUE, $reset = FALSE) {
 // @see https://www.drupal.org/node/2164623
 // ctools_include('plugins');
 
-  $providers = \Drupal::service('plugin.manager.encrypt.key_providers')->getDefinitions();
+  $providers = \Drupal::service('plugin.manager.key.key_type')->getDefinitions();
 
   return $all ? $providers : array_filter($providers, '_encrypt_plugin_is_valid');
 }

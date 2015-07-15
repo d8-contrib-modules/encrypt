@@ -9,7 +9,7 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\encrypt\EncryptionMethodManager;
-use Drupal\encrypt\KeyProviderManager;
+use Drupal\key\KeyTypePluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -23,7 +23,7 @@ class EncryptAddConfigurationForm extends FormBase {
    * Constructs a \Drupal\system\FormBase object.
    *
    */
-  public function __construct(EncryptionMethodManager $encryption_method_manager, KeyProviderManager $key_provider_manager) {
+  public function __construct(EncryptionMethodManager $encryption_method_manager, KeyTypePluginManager $key_provider_manager) {
     $this->encryptionMethodManager = $encryption_method_manager;
     $this->keyProviderManager = $key_provider_manager;
   }
@@ -34,7 +34,7 @@ class EncryptAddConfigurationForm extends FormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('plugin.manager.encrypt.encryption_methods'),
-      $container->get('plugin.manager.encrypt.key_providers')
+      $container->get('plugin.manager.key.key_type')
     );
   }
 
@@ -47,7 +47,6 @@ class EncryptAddConfigurationForm extends FormBase {
       $method_options[$encryptionMethod['id']] = $encryptionMethod['title'];
     }
 
-    // Create a list of provider titles to be used for radio buttons.
     $provider_options = array();
     foreach ($this->keyProviderManager->getDefinitions() as $keyProvider) {
       $provider_options[$keyProvider['id']] = $keyProvider['title'];

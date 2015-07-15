@@ -2,6 +2,3 @@ services:
   plugin.manager.encrypt.encryption_methods:
     class: Drupal\encrypt\EncryptionMethodManager
     parent: default_plugin_manager
-  plugin.manager.encrypt.key_providers:
-    class: Drupal\encrypt\KeyProviderManager
-    parent: default_plugin_manager
