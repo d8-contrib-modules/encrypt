@@ -73,8 +73,10 @@ class EncryptSettingsForm extends ConfigFormBase {
     $config = $this->config('encrypt.settings');
 
     $keys = [];
-    foreach ($this->key_manager->getKeys() as $key_id => $definition) {
-      $keys[$key_id] = (string) $definition['title'];
+    foreach ($this->key_manager->getKeys() as $key) {
+      $key_id = $key->id();
+      $key_title = $key->label();
+      $keys[$key_id] = (string) $key_title;
     }
     $form['encryption_key'] = array(
       '#type' => 'select',
@@ -85,7 +87,7 @@ class EncryptSettingsForm extends ConfigFormBase {
     );
 
     $enc_methods = [];
-    foreach ($this->encrypt_service->getDefinitions() as $plugin_id => $definition) {
+    foreach ($this->encrypt_service->loadEncryptionMethods() as $plugin_id => $definition) {
       $enc_methods[$plugin_id] = (string) $definition['title'];
     }
     $form['encryption_method'] = array(

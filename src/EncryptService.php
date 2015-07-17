@@ -17,6 +17,19 @@ use Drupal\key\KeyManager;
 class EncryptService {
 
   /**
+   * Returns the registered encryption method plugins.
+   *
+   * @return array
+   *   List of encryption methods.
+   */
+  function loadEncryptionMethods() {
+    $service = \Drupal::getContainer()->get('plugin.manager.encrypt.encryption_methods');
+
+    return $service->getDefinitions();
+  }
+
+
+  /**
    * Main encrypt function.
    *
    * @param string $text
