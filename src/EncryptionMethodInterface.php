@@ -5,10 +5,10 @@ namespace Drupal\encrypt;
 use Drupal\Component\Plugin\PluginInspectionInterface;
 
 /**
- * Interface EncryptionMethodBaseInterface
+ * Interface EncryptionMethodInterface
  * @package Drupal\encrypt
  */
-interface EncryptionMethodBaseInterface extends PluginInspectionInterface {
+interface EncryptionMethodInterface extends PluginInspectionInterface {
 
     /**
      * @return mixed
@@ -18,10 +18,10 @@ interface EncryptionMethodBaseInterface extends PluginInspectionInterface {
     /**
      * @return mixed
      */
-    public function encrypt($text, $key, $options = array());
+    public function encrypt($text, $key);
 
     /**
      * @return mixed
      */
-    public function decrypt($text, $key, $options = array());
+    public function decrypt($text, $key);
 }
