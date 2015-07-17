@@ -17,19 +17,6 @@ use Drupal\key\KeyManager;
 class EncryptService {
 
   /**
-   * Drupal\key\KeyManager definition.
-   *
-   * @var Drupal\key\KeyManager
-   */
-  protected $key_manager;
-  /**
-   * Constructor.
-   */
-  public function __construct(KeyManager $key_manager) {
-    $this->key_manager = $key_manager;
-  }
-
-  /**
    * Main encrypt function.
    *
    * @param string $text
@@ -43,10 +30,10 @@ class EncryptService {
     $settings = \Drupal::config('encrypt.settings');
 
     // Load the key.
-    $key = $this->key_manager->getKey($settings->get('encryption_key'));
+    $key = \Drupal::getContainer()->get('key_manager')->getKey($settings->get('encryption_key'));
 
     // Load the encryption method.
-    $enc_method = \Drupal::getContainer()->get('encrypt.encryption')->createInstance($settings->get('encryption_method'));
+    $enc_method = \Drupal::getContainer()->get('encryption')->createInstance($settings->get('encryption_method'));
 
     // Return the encrypted string.
     return $enc_method->encrypt($text, $key->getContents());
