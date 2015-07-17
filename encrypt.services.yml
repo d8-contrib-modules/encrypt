@@ -4,7 +4,7 @@ services:
 
   plugin.manager.encrypt.encryption_methods:
     class: Drupal\encrypt\EncryptionMethodManager
-    parent: default_plugin_manager  encrypt.encryption:
+    parent: default_plugin_manager
     class: Drupal\encrypt\EncryptService
     arguments: ["@key_manager"]
 

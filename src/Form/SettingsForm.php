@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\encrypt\Form\SettingsForm.
+ * Contains Drupal\encrypt\Form\EncryptSettingsForm.
  */
 
 namespace Drupal\encrypt\Form;
@@ -15,7 +15,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\key\KeyManager;
 
 /**
- * Class SettingsForm.
+ * Class EncryptSettingsForm.
  *
  * @package Drupal\encrypt\Form
  */
