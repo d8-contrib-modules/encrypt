@@ -1,4 +1,7 @@
 services:
+  encryption:
+    class: Drupal\encrypt\EncryptService
+
   plugin.manager.encrypt.encryption_methods:
     class: Drupal\encrypt\EncryptionMethodManager
     parent: default_plugin_manager  encrypt.encryption:
