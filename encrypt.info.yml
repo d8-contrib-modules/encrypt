@@ -4,7 +4,7 @@ core: 8.x
 package: Encryption
 dependencies:
   - key
-version: 7.x-2.0
+version: 7.x-3.0
 project: encrypt
 datestamp: '1412192667'
 type: module

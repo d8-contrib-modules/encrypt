@@ -1,7 +1,0 @@
-encrypt_test_trigger_unmet_deps: true
-encrypt_default_config: default
-encrypt_encryption_method: default
-encrypt_key_provider: drupal_private_key
-encrypt_drupal_variable_key: null
-encrypt_default_method: null
-encrypt_secure_key_path: null
