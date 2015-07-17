@@ -1,9 +1,16 @@
 
 encrypt.encrypt_settings_form:
-  path: '/admin/config/encrypt/settings'
+  path: '/admin/config/security/encryption'
   defaults:
     _form: '\Drupal\encrypt\Form\EncryptSettingsForm'
     _title: 'Encrypt Settings'
   requirements:
     _permission: 'access administration pages'
 
+encrypt.admin_index:
+  path: '/admin/config/security'
+  defaults:
+    _content: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+    _title: 'Security'
+  requirements:
+    _permission: 'access administration pages'
