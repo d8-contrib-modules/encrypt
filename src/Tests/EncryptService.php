@@ -34,7 +34,7 @@ class EncryptService extends WebTestBase {
       'key_type' => 'key_type_simple',
     ];
     $this->drupalPostAJAX(NULL, $edit, 'key_type');
-    
+
     $edit = [
       'label' => 'Testing Key',
       'key_type' => 'key_type_simple',
