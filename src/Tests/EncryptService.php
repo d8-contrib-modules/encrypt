@@ -28,12 +28,19 @@ class EncryptService extends WebTestBase {
     $this->drupalLogin($user1);
 
     // Create new simple key.
+    $this->drupalGet('admin/config/system/key/add');
+    $edit = [
+      'label' => 'Testing Key',
+      'key_type' => 'key_type_simple',
+    ];
+    $this->drupalPostAJAX(NULL, $edit, 'key_type');
+    
     $edit = [
       'label' => 'Testing Key',
       'key_type' => 'key_type_simple',
       'key_settings[simple_key_value]' => 'test this key out',
     ];
-    $this->drupalPostForm('admin/config/system/key/add', $edit, t('Save'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
 
 
     // Change encrypt settings.
