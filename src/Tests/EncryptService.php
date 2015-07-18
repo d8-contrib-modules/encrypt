@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Definition of Drupal\encrypt\Tests\KeyService.
+ * Definition of Drupal\encrypt\Tests\EncryptService.
  */
 
 namespace Drupal\encrypt\Tests;
