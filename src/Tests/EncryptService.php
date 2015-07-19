@@ -16,7 +16,7 @@ use Drupal\simpletest\WebTestBase;
  */
 class EncryptService extends WebTestBase {
 
-  public static $modules = array('key', 'encrypt');
+  public static $modules = array('key', 'encrypt', 'dblog');
 
   /**
    * Test both encrypt and decrypt functions.
@@ -35,6 +35,7 @@ class EncryptService extends WebTestBase {
     $this->drupalPostAjaxForm(NULL, $edit, 'key_type');
 
     $edit = [
+      'id' => 'testing_key',
       'label' => 'Testing Key',
       'key_type' => 'key_type_simple',
       'key_settings[simple_key_value]' => 'test this key out',
@@ -49,13 +50,15 @@ class EncryptService extends WebTestBase {
     ];
     $this->drupalPostForm('admin/config/security/encryption', $edit, t('Save configuration'));
 
+
     // Test encryption service.
-    $enc_string = \Drupal::getContainer()->get('encryption')->encrypt('test');
+    $enc_string = \Drupal::service('encryption')->encrypt('test');
     $this->assertEqual($enc_string, 'encrypted text', 'The encryption service is not properly processing');
 
     // Test decryption service.
-    $dec_string = \Drupal::getContainer()->get('encryption')->decrypt($enc_string);
+    $dec_string = \Drupal::service('encryption')->decrypt($enc_string);
     $this->assertEqual($dec_string, 'test', 'The decryption service is not properly processing');
+
 
   }
 }

@@ -2,7 +2,7 @@
 
 namespace Drupal\encrypt\Plugin\EncryptionMethod;
 
-use Drupal\encrypt\EncryptionMethodBaseInterface;
+use Drupal\encrypt\EncryptionMethodInterface;
 use Drupal\Core\Plugin\PluginBase;
 
 /**
@@ -15,7 +15,7 @@ use Drupal\Core\Plugin\PluginBase;
  *   description = "Uses the <a href='http://phpseclib.sourceforge.net/'>phpseclib</a> library. This method is only preferable if you cannot install mcrypt."
  * )
  */
-class PHPSecLibEncryption extends PluginBase implements EncryptionMethodBaseInterface {
+class PHPSecLibEncryption extends PluginBase implements EncryptionMethodInterface {
 
   /**
    * @return mixed

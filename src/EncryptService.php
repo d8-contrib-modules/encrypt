@@ -43,13 +43,13 @@ class EncryptService {
     $settings = \Drupal::config('encrypt.settings');
 
     // Load the key.
-    $key = \Drupal::getContainer()->get('key_manager')->getKey($settings->get('encryption_key'));
+    $key_value = \Drupal::service('key_manager')->getKeyValue($settings->get('encryption_key'));
 
     // Load the encryption method.
-    $enc_method = \Drupal::getContainer()->get('plugin.manager.encrypt.encryption_methods')->createInstance($settings->get('encryption_method'));
+    $enc_method = \Drupal::service('plugin.manager.encrypt.encryption_methods')->createInstance($settings->get('encryption_method'));
 
     // Return the encrypted string.
-    return $enc_method->encrypt($text, $key->getKeySettings());
+    return $enc_method->encrypt($text, $key_value);
   }
 
   /**
@@ -66,12 +66,12 @@ class EncryptService {
     $settings = \Drupal::config('encrypt.settings');
 
     // Load the key.
-    $key = \Drupal::getContainer()->get('key_manager')->getKey($settings->get('encryption_key'));
+    $key = \Drupal::service('key_manager')->getKey($settings->get('encryption_key'));
 
     // Load the encryption method.
-    $enc_method = \Drupal::getContainer()->get('plugin.manager.encrypt.encryption_methods')->createInstance($settings->get('encryption_method'));
+    $enc_method = \Drupal::service('plugin.manager.encrypt.encryption_methods')->createInstance($settings->get('encryption_method'));
 
     // Return the encrypted string.
-    return $enc_method->decrypt($text, $key->getKeySettings());
+    return $enc_method->decrypt($text, $key->getKeyValue());
   }
 }

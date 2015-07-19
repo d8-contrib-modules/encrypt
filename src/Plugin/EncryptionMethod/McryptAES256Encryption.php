@@ -2,7 +2,7 @@
 
 namespace Drupal\encrypt\Plugin\EncryptionMethod;
 
-use Drupal\encrypt\EncryptionMethodBaseInterface;
+use Drupal\encrypt\EncryptionMethodInterface;
 use Drupal\Core\Plugin\PluginBase;
 
 /**
@@ -15,7 +15,7 @@ use Drupal\Core\Plugin\PluginBase;
  *   description = "This uses PHPs mcrypt extension and <a href='http://en.wikipedia.org/wiki/Advanced_Encryption_Standard'>AES-256</a>."
  * )
  */
-class McryptAES256Encryption extends PluginBase implements EncryptionMethodBaseInterface {
+class McryptAES256Encryption extends PluginBase implements EncryptionMethodInterface {
 
   /**
    * @return mixed
