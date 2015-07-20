@@ -1,0 +1,10 @@
+encrypt.settings:
+  type: config_object
+  label: 'Encrypt settings'
+  mapping:
+    encryption_key:
+      type: string
+      label: 'Key selected for encryption service'
+    encryption_method:
+      type: string
+      label: 'Encryption method selected for encryption service'
