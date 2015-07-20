@@ -52,13 +52,21 @@ class EncryptService extends WebTestBase {
 
 
     // Test encryption service.
-    $enc_string = \Drupal::service('encryption')->encrypt('test');
-    $this->assertEqual($enc_string, 'encrypted text', 'The encryption service is not properly processing');
+    $test_string = 'testing 123 &*#';
+
+    $this->verbose('Testing string: ' . $test_string);
+
+    $enc_string = \Drupal::service('encryption')->encrypt($test_string);
+
+    $this->verbose('Encrypted string: ' . $enc_string);
+
+    $this->assertEqual($enc_string, 'n76uUVe8NGZsV2WES4NOJOiCYgtGtYq7tfpcykwfkmI=', 'The encryption service is not properly processing');
 
     // Test decryption service.
     $dec_string = \Drupal::service('encryption')->decrypt($enc_string);
-    $this->assertEqual($dec_string, 'test', 'The decryption service is not properly processing');
 
+    $this->verbose('Decrypted string: ' . $dec_string);
 
+    $this->assertEqual($dec_string, $test_string, 'The decryption service is not properly processing');
   }
 }
