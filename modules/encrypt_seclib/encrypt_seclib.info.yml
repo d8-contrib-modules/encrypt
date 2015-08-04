@@ -1,0 +1,9 @@
+name: Encrypt - PHPSecLib Encryption
+description: 'PHPSecLib Encryption for the Encrypt module.'
+core: 8.x
+package: Encryption
+dependencies:
+  - encrypt
+version: 8.x-1.0
+project: encrypt_seclib
+type: module

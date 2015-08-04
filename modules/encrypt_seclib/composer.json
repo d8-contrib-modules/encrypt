@@ -1,0 +1,8 @@
+{
+  "name": "drupal/encrypt_seclib",
+  "description": "Integrates the phpseclib library into Drupal",
+  "type": "drupal-module",
+  "require": {
+    "phpseclib/phpseclib": "2.0.*"
+  }
+}

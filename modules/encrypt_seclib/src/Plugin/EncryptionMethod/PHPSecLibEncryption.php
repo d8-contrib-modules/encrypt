@@ -1,13 +1,14 @@
 <?php
 
-namespace Drupal\encrypt\Plugin\EncryptionMethod;
+namespace Drupal\encrypt_seclib\Plugin\EncryptionMethod;
 
 use Drupal\encrypt\EncryptionMethodInterface;
 use Drupal\Core\Plugin\PluginBase;
+use phpseclib\Crypt\AES;
 
 /**
  * Class PHPSecLibEncryption
- * @package Drupal\encrypt\Plugin\EncryptionMethod
+ * @package Drupal\encrypt_seclib\Plugin\EncryptionMethod
  *
  * @EncryptionMethod(
  *   id = "phpseclib",
@@ -26,8 +27,8 @@ class PHPSecLibEncryption extends PluginBase implements EncryptionMethodInterfac
     if (!\Drupal::moduleHandler()->moduleExists('libraries')) {
       $errors[] = t('You must download and enable the <a href="http://drupal.org/project/libraries">Libraries API</a> module.');
     }
-    if (!file_exists('sites/all/libraries/phpseclib') && !file_exists(\Drupal\Core\DrupalKernel::findSitePath() . '/phpseclib')) {
-      $errors[] = t('You must download the <a href="http://phpseclib.sourceforge.net/">phpseclib</a> library and place it in either sites/all/libraries or sites/yourdomain/libraries.');
+    if (!file_exists('libraries/phpseclib') && !file_exists(\Drupal\Core\DrupalKernel::findSitePath() . '/phpseclib')) {
+      $errors[] = t('You must download the <a href="http://phpseclib.sourceforge.net/">phpseclib</a> library and place it in /libraries .');
     }
 
     return $errors;
@@ -42,12 +43,8 @@ class PHPSecLibEncryption extends PluginBase implements EncryptionMethodInterfac
     $disable_base64 = array_key_exists('base64', $options) && $options['base64'] == FALSE;
 
     if ($path = libraries_get_path('phpseclib')) {
-      // Include the AES file and instantiate.
-      require_once $path . '/Crypt/AES.php';
-      $aes = new Crypt_AES();
-
+      $aes = new AES();
       $aes->setKey($key);
-
       $processed_text = $aes->encrypt($text);
     }
 
@@ -73,12 +70,8 @@ class PHPSecLibEncryption extends PluginBase implements EncryptionMethodInterfac
     }
 
     if ($path = libraries_get_path('phpseclib')) {
-      // Include the AES file and instantiate.
-      require_once $path . '/Crypt/AES.php';
-      $aes = new Crypt_AES();
-
+      $aes = new AES();
       $aes->setKey($key);
-
       $processed_text = $aes->decrypt($text);
     }
 
