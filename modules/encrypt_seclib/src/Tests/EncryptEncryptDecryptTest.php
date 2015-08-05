@@ -1,5 +1,5 @@
 <?php
-namespace Drupal\encrypt\Tests;
+namespace Drupal\encrypt_seclib\Tests;
 
 /**
  * Test basic encrypting and decripting of a string.
@@ -19,10 +19,10 @@ class EncryptEncryptDecryptTest extends \Drupal\simpletest\WebTestBase {
   }
 
   public /**
-   * Enable encrypt module.
+   * Enable encrypt_seclib module.
    */
   function setUp() {
-    parent::setUp('encrypt');
+    parent::setUp('encrypt_seclib');
   }
 
   public /**
