@@ -1,5 +1,5 @@
 <?php
-namespace Drupal\encrypt\Tests;
+namespace Drupal\encrypt_seclib\Tests;
 
 /**
  * Test encryption method and key provider implementation.
@@ -22,7 +22,7 @@ class EncryptEncryptionMethodPluginsTest extends \Drupal\simpletest\WebTestBase 
    * Enable encrypt module.
    */
   function setUp() {
-    parent::setUp('encrypt', 'encrypt_test');
+    parent::setUp('encrypt_seclib');
     $adminUser = $this->drupalCreateUser(['administer encrypt']);
     $this->drupalLogin($adminUser);
   }
