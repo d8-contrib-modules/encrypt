@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Definition of Drupal\encrypt\Tests\EncryptService.
+ * Definition of Drupal\encrypt_seclib\Tests\EncryptService.
  */
 
-namespace Drupal\encrypt\Tests;
+namespace Drupal\encrypt_seclib\Tests;
 
 use Drupal\simpletest\WebTestBase;
 
@@ -16,7 +16,7 @@ use Drupal\simpletest\WebTestBase;
  */
 class EncryptService extends WebTestBase {
 
-  public static $modules = array('key', 'encrypt', 'dblog');
+  public static $modules = array('key', 'encrypt_seclib', 'dblog');
 
   /**
    * Test both encrypt and decrypt functions.
