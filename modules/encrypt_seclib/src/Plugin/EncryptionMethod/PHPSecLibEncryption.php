@@ -21,22 +21,6 @@ class PHPSecLibEncryption extends PluginBase implements EncryptionMethodInterfac
   /**
    * @return mixed
    */
-  public function getDependencies() {
-    $errors = array();
-
-    if (!\Drupal::moduleHandler()->moduleExists('libraries')) {
-      $errors[] = t('You must download and enable the <a href="http://drupal.org/project/libraries">Libraries API</a> module.');
-    }
-    if (!file_exists('libraries/phpseclib') && !file_exists(\Drupal\Core\DrupalKernel::findSitePath() . '/phpseclib')) {
-      $errors[] = t('You must download the <a href="http://phpseclib.sourceforge.net/">phpseclib</a> library and place it in /libraries .');
-    }
-
-    return $errors;
-  }
-
-  /**
-   * @return mixed
-   */
   public function encrypt($text, $key, $options = array()) {
     $processed_text = '';
 
