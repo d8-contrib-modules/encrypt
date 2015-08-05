@@ -4,6 +4,7 @@ core: 8.x
 package: Encryption
 dependencies:
   - encrypt
+  - composer_manager
 version: 8.x-1.0
 project: encrypt_seclib
 type: module
