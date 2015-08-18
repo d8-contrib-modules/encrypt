@@ -8,68 +8,77 @@
 namespace Drupal\encrypt;
 
 use Drupal\key\KeyManager;
+use Drupal\Core\Config\ConfigFactoryInterface;
 
 /**
  * Class EncryptService.
  *
  * @package Drupal\encrypt
  */
-class EncryptService {
+class EncryptService implements EncryptServiceInterface {
 
   /**
-   * Returns the registered encryption method plugins.
-   *
-   * @return array
-   *   List of encryption methods.
+   * @var \Drupal\encrypt\EncryptionMethodManager
+   */
+  protected $manager;
+
+  /**
+   * @var \Drupal\key\KeyManager
+   */
+  protected $key;
+
+  /**
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $config;
+
+  /**
+   * @param \Drupal\encrypt\EncryptionMethodManager $manager
+   * @param \Drupal\key\KeyManager $key
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config
+   */
+  public function __construct(EncryptionMethodManager $manager, KeyManager $key, ConfigFactoryInterface $config) {
+    $this->manager = $manager;
+    $this->key = $key;
+    $this->config = $config;
+  }
+
+  /**
+   * {@inheritdoc}
    */
   function loadEncryptionMethods() {
-    $service = \Drupal::getContainer()->get('plugin.manager.encrypt.encryption_methods');
-
-    return $service->getDefinitions();
+    return $this->manager->getDefinitions();
   }
 
 
   /**
-   * Main encrypt function.
-   *
-   * @param string $text
-   *  The plain text to encrypt.
-   *
-   * return string
-   *  The encrypted string.
+   * {@inheritdoc}.
    */
   function encrypt($text) {
     // Get settings.
-    $settings = \Drupal::config('encrypt.settings');
-
+    $settings = $this->config->get('encrypt.settings');
     // Load the key.
-    $key_value = \Drupal::service('key_manager')->getKeyValue($settings->get('encryption_key'));
+    $key_value = $this->key->getKeyValue($settings->get('encryption_key'));
 
     // Load the encryption method.
-    $enc_method = \Drupal::service('plugin.manager.encrypt.encryption_methods')->createInstance($settings->get('encryption_method'));
+    $enc_method = $this->manager->createInstance($settings->get('encryption_method'));
 
     // Return the encrypted string.
     return $enc_method->encrypt($text, $key_value);
   }
 
   /**
-   * Main decrypt function.
-   *
-   * @param string $text
-   *  The encrypted text to decrypt.
-   *
-   * return string
-   *  The decrypted plain string.
+   * {@inheritdoc}
    */
   function decrypt($text) {
     // Get settings.
-    $settings = \Drupal::config('encrypt.settings');
+    $settings = $this->config->get('encrypt.settings');
 
     // Load the key.
-    $key = \Drupal::service('key_manager')->getKey($settings->get('encryption_key'));
+    $key = $this->key->getKey($settings->get('encryption_key'));
 
     // Load the encryption method.
-    $enc_method = \Drupal::service('plugin.manager.encrypt.encryption_methods')->createInstance($settings->get('encryption_method'));
+    $enc_method = $this->manager->createInstance($settings->get('encryption_method'));
 
     // Return the encrypted string.
     return $enc_method->decrypt($text, $key->getKeyValue());
