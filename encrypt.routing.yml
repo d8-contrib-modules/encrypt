@@ -14,3 +14,36 @@ encrypt.admin_index:
     _title: 'Security'
   requirements:
     _permission: 'access administration pages'
+# EncryptionConfiguration routing definition
+entity.encryption_configuration.collection:
+  path: '/admin/structure/encryption_configuration'
+  defaults:
+    _entity_list: 'encryption_configuration'
+    _title: 'Encryption Configuration'
+  requirements:
+    _permission: 'administer site configuration'
+
+entity.encryption_configuration.add_form:
+  path: '/admin/structure/encryption_configuration/add'
+  defaults:
+    _entity_form: 'encryption_configuration.add'
+    _title: 'Add Encryption Configuration'
+  requirements:
+    _permission: 'administer site configuration'
+
+entity.encryption_configuration.edit_form:
+  path: '/admin/structure/encryption_configuration/{encryption_configuration}'
+  defaults:
+    _entity_form: 'encryption_configuration.edit'
+    _title: 'Edit Encryption Configuration'
+  requirements:
+    _permission: 'administer site configuration'
+
+entity.encryption_configuration.delete_form:
+  path: '/admin/structure/encryption_configuration/{encryption_configuration}/delete'
+  defaults:
+    _entity_form: 'encryption_configuration.delete'
+    _title: 'Delete Encryption Configuration'
+  requirements:
+    _permission: 'administer site configuration'
+

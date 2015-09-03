@@ -1,0 +1,6 @@
+entity.encryption_configuration.add_form:
+  route_name: 'entity.encryption_configuration.add_form'
+  title: 'Add Encryption Configuration'
+  appears_on:
+    - entity.encryption_configuration.collection
+

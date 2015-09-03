@@ -10,3 +10,10 @@ encrypt.admin:
   parent: encrypt.admin_index
   route_name: encrypt.encrypt_settings_form
 
+# Title menu items definition
+entity.encryption_configuration.collection:
+  title: 'Encryption Configurations'
+  route_name: entity.encryption_configuration.collection
+  description: 'Encryption Configuration listing'
+  parent: system.admin_structure
+

@@ -7,6 +7,7 @@
 
 namespace Drupal\encrypt;
 
+use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\key\KeyManager;
 use Drupal\Core\Config\ConfigFactoryInterface;
 
@@ -18,9 +19,14 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 class EncryptService implements EncryptServiceInterface {
 
   /**
+   * @var \Drupal\Core\Entity\EntityManagerInterface
+   */
+  protected $entityManager;
+
+  /**
    * @var \Drupal\encrypt\EncryptionMethodManager
    */
-  protected $manager;
+  protected $encryptManager;
 
   /**
    * @var \Drupal\key\KeyManager
@@ -33,35 +39,47 @@ class EncryptService implements EncryptServiceInterface {
   protected $config;
 
   /**
+   * @param \Drupal\Core\Entity\EntityManagerInterface $entityManager
    * @param \Drupal\encrypt\EncryptionMethodManager $manager
    * @param \Drupal\key\KeyManager $key
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config
    */
-  public function __construct(EncryptionMethodManager $manager, KeyManager $key, ConfigFactoryInterface $config) {
-    $this->manager = $manager;
+  public function __construct(EntityManagerInterface $entityManager, EncryptionMethodManager $encryptManager, KeyManager $key) {
+    $this->entityManager = $entityManager;
+    $this->encryptManager = $encryptManager;
     $this->key = $key;
-    $this->config = $config;
   }
 
   /**
    * {@inheritdoc}
    */
-  function loadEncryptionMethods() {
-    return $this->manager->getDefinitions();
+  public function loadEncryptionMethods() {
+    return $this->encryptManager->getDefinitions();
   }
 
 
   /**
    * {@inheritdoc}.
    */
-  function encrypt($text) {
-    // Get settings.
-    $settings = $this->config->get('encrypt.settings');
+  public function encrypt($text, $inst_id = NULL) {
+
+    if ($inst_id) {
+      /** @var $enc_config \Drupal\encrypt\Entity\EncryptionConfiguration */
+      if (!$enc_config = $this->entityManager->getStorage('encryption_configuration')
+        ->load($inst_id)) {
+        return FALSE;
+      }
+    } else {
+      // Load the default.
+      /** @var $enc_config \Drupal\encrypt\Entity\EncryptionConfiguration */
+      $enc_config = $this->entityManager->getStorage('encryption_configuration')
+        ->loadByProperties(array('service_default' => TRUE));
+    }
+
     // Load the key.
-    $key_value = $this->key->getKeyValue($settings->get('encryption_key'));
+    $key_value = $this->key->getKeyValue($enc_config->getEncryptionKey());
 
     // Load the encryption method.
-    $enc_method = $this->manager->createInstance($settings->get('encryption_method'));
+    $enc_method = $this->encryptManager->createInstance($enc_config->getEncryptionMethod());
 
     // Return the encrypted string.
     return $enc_method->encrypt($text, $key_value);
@@ -70,17 +88,27 @@ class EncryptService implements EncryptServiceInterface {
   /**
    * {@inheritdoc}
    */
-  function decrypt($text) {
-    // Get settings.
-    $settings = $this->config->get('encrypt.settings');
+  public function decrypt($text, $inst_id = NULL) {
+    if ($inst_id) {
+      /** @var $enc_config \Drupal\encrypt\Entity\EncryptionConfiguration */
+      if (!$enc_config = $this->entityManager->getStorage('encryption_configuration')
+        ->load($inst_id)) {
+        return FALSE;
+      }
+    } else {
+      // Load the default.
+      /** @var $enc_config \Drupal\encrypt\Entity\EncryptionConfiguration */
+      $enc_config = $this->entityManager->getStorage('encryption_configuration')
+        ->loadByProperties(array('service_default' => TRUE));
+    }
 
     // Load the key.
-    $key = $this->key->getKey($settings->get('encryption_key'));
+    $key_value = $this->key->getKeyValue($enc_config->getEncryptionKey());
 
     // Load the encryption method.
-    $enc_method = $this->manager->createInstance($settings->get('encryption_method'));
+    $enc_method = $this->encryptManager->createInstance($enc_config->getEncryptionMethod());
 
     // Return the encrypted string.
-    return $enc_method->decrypt($text, $key->getKeyValue());
+    return $enc_method->decrypt($text, $key_value);
   }
 }
