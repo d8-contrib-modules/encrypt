@@ -4,12 +4,6 @@ encrypt.admin_index:
   parent: system.admin_config
   route_name: encrypt.admin_index
 
-encrypt.admin:
-  title: 'Encrypt Settings'
-  description: 'Configure settings for the Encryption module.'
-  parent: encrypt.admin_index
-  route_name: encrypt.encrypt_settings_form
-
 # Title menu items definition
 entity.encryption_configuration.collection:
   title: 'Encryption Configurations'

@@ -9,7 +9,6 @@ namespace Drupal\encrypt;
 
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\key\KeyManager;
-use Drupal\Core\Config\ConfigFactoryInterface;
 
 /**
  * Class EncryptService.
@@ -33,10 +32,6 @@ class EncryptService implements EncryptServiceInterface {
    */
   protected $key;
 
-  /**
-   * @var \Drupal\Core\Config\ConfigFactoryInterface
-   */
-  protected $config;
 
   /**
    * @param \Drupal\Core\Entity\EntityManagerInterface $entityManager
