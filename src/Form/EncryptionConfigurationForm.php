@@ -93,6 +93,7 @@ class EncryptionConfigurationForm extends EntityForm {
       $key_title = $key->label();
       $keys[$key_id] = (string) $key_title;
     }
+
     $form['encryption_key'] = array(
       '#type' => 'select',
       '#title' => $this->t('Encryption Key'),

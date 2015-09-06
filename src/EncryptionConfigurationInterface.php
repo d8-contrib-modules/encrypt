@@ -26,4 +26,17 @@ interface EncryptionConfigurationInterface extends ConfigEntityInterface {
    * @return \Drupal\encrypt\EncryptionMethodInterface
    */
   public function getEncryptionMethod();
+
+  /**
+   * Gets if this encryption configuration is the default.
+   *
+   * @return boolean
+   */
+  public function getServiceDefault();
+
+  /**
+   * Sets the encryption configuration to be the default.
+   *
+   */
+  public function setServiceDefault();
 }

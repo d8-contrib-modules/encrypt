@@ -47,3 +47,11 @@ entity.encryption_configuration.delete_form:
   requirements:
     _permission: 'administer site configuration'
 
+entity.encryption_configuration.set_default:
+  path: '/admin/structure/encryption_configuration/{encryption_configuration}/default'
+  defaults:
+    _entity_form: 'encryption_configuration.default'
+    _title: 'Make Encryption Configuration Default'
+  requirements:
+    _permission: 'administer site configuration'
+

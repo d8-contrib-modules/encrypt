@@ -21,7 +21,8 @@ use Drupal\encrypt\EncryptionConfigurationInterface;
  *     "form" = {
  *       "add" = "Drupal\encrypt\Form\EncryptionConfigurationForm",
  *       "edit" = "Drupal\encrypt\Form\EncryptionConfigurationForm",
- *       "delete" = "Drupal\encrypt\Form\EncryptionConfigurationDeleteForm"
+ *       "delete" = "Drupal\encrypt\Form\EncryptionConfigurationDeleteForm",
+ *       "default" = "Drupal\encrypt\Form\EncryptionConfigurationDefaultForm"
  *     }
  *   },
  *   config_prefix = "encryption_configuration",
@@ -34,7 +35,9 @@ use Drupal\encrypt\EncryptionConfigurationInterface;
  *   links = {
  *     "canonical" = "/admin/structure/encryption_configuration/{encryption_configuration}",
  *     "edit-form" = "/admin/structure/encryption_configuration/{encryption_configuration}/edit",
- *     "delete-form" = "/admin/structure/encryption_configuration/{encryption_configuration}/delete"
+ *     "delete-form" = "/admin/structure/encryption_configuration/{encryption_configuration}/delete",
+ *     "collection" = "/admin/structure/encryption_configuration",
+ *     "set-default" = "/admin/structure/encryption_configuration/{encryption_configuration}/default",
  *   }
  * )
  */
@@ -58,14 +61,14 @@ class EncryptionConfiguration extends ConfigEntityBase implements EncryptionConf
    *
    * @var \Drupal\encrypt\EncryptionMethodInterface
    */
-  protected $encryptionMethod;
+  protected $encryption_method;
 
   /**
    * The encryption key, id of Key entity.
    *
    * @var string
    */
-  protected $encryptionKey;
+  protected $encryption_key;
 
   /**
    * If the configuration is to be the default encryption config used for the
@@ -73,19 +76,42 @@ class EncryptionConfiguration extends ConfigEntityBase implements EncryptionConf
    *
    * @var boolean
    */
-  protected $serviceDefault;
+  protected $service_default;
 
   /**
    * {@inheritdoc}
    */
   public function getEncryptionKey() {
-    return $this->encryptionKey;
+    return $this->encryption_key;
   }
 
   /**
    * {@inheritdoc}
    */
   public function getEncryptionMethod() {
-    return $this->encryptionMethod;
+    return $this->encryption_method;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getServiceDefault() {
+    return $this->service_default;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setServiceDefault() {
+    $entities = \Drupal::entityManager()
+      ->getStorage('encryption_configuration')
+      ->loadByProperties(['service_default'=>TRUE]);
+    foreach ($entities as $entity) {
+      $entity->service_default = FALSE;
+      $entity->save();
+    }
+
+    $this->service_default = TRUE;
+    $this->save();
   }
 }
