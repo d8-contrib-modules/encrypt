@@ -144,7 +144,7 @@ class EncryptionProfileForm extends EntityForm {
 
     // Let's save the keys.
     $id = $encryption_profile->id();
-    /** @var $config \Drupal\Core\Config\ImmutableConfig */
+    /** @var $config \Drupal\Core\Config\ */
     $config = $this->config_factory->getEditable('encrypt.settings');
     $profile_keys = $config->get('profile_keys');
     $new_keys = [];

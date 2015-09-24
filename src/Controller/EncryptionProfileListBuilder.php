@@ -21,6 +21,7 @@ class EncryptionProfileListBuilder extends ConfigEntityListBuilder {
     $header['label'] = $this->t('Label');
     $header['id'] = $this->t('Machine name');
     $header['service_default'] = $this->t('Default');
+    $header['key'] = $this->t('Key');
     return $header + parent::buildHeader();
   }
 
@@ -31,6 +32,17 @@ class EncryptionProfileListBuilder extends ConfigEntityListBuilder {
     $row['label'] = $this->getLabel($entity);
     $row['id'] = $entity->id();
     $row['service_default'] = ($entity->getServiceDefault())?"Yes":"No";
+
+    $profile_keys = \Drupal::config('encrypt.settings')->get('profile_keys');
+    foreach ($profile_keys as $profile_key) {
+      if ($profile_key->encryption_profile == $entity->id()) {
+        $row['key'] = $profile_key->encryption_key;
+      }
+    }
+
+    if (empty($row['key'])) {
+      $row['key'] = 'default';
+    }
     return $row + parent::buildRow($entity);
   }
 
