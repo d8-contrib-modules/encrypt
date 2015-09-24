@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\encrypt\Form\EncryptionConfigurationDefaultForm.
+ * Contains Drupal\encrypt\Form\EncryptionProfileDeleteForm.
  */
 
 namespace Drupal\encrypt\Form;
@@ -12,38 +12,38 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 
 /**
- * Builds the form to make Encryption Configuration entities default.
+ * Builds the form to delete profile entities.
  */
-class EncryptionConfigurationDefaultForm extends EntityConfirmFormBase {
+class EncryptionProfileDeleteForm extends EntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return $this->t('Are you sure you want to make %name the default encryption?', array('%name' => $this->entity->label()));
+    return $this->t('Are you sure you want to delete %name?', array('%name' => $this->entity->label()));
   }
 
   /**
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return new Url('entity.encryption_configuration.collection');
+    return new Url('entity.encryption_profile.collection');
   }
 
   /**
    * {@inheritdoc}
    */
   public function getConfirmText() {
-    return $this->t('Set Default');
+    return $this->t('Delete');
   }
 
   /**
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $this->entity->setServiceDefault();
+    $this->entity->delete();
 
     drupal_set_message(
-      $this->t('content @type: @label is now default.',
+      $this->t('content @type: deleted @label.',
         [
           '@type' => $this->entity->bundle(),
           '@label' => $this->entity->label()

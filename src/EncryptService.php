@@ -58,23 +58,23 @@ class EncryptService implements EncryptServiceInterface {
   public function encrypt($text, $inst_id = NULL) {
 
     if ($inst_id) {
-      /** @var $enc_config \Drupal\encrypt\Entity\EncryptionConfiguration */
-      if (!$enc_config = $this->entityManager->getStorage('encryption_configuration')
+      /** @var $enc_profile \Drupal\encrypt\Entity\EncryptionProfile */
+      if (!$enc_profile = $this->entityManager->getStorage('encryption_profile')
         ->load($inst_id)) {
         return FALSE;
       }
     } else {
       // Load the default.
-      /** @var $enc_config \Drupal\encrypt\Entity\EncryptionConfiguration */
-      $enc_config = $this->entityManager->getStorage('encryption_configuration')
+      /** @var $enc_profile \Drupal\encrypt\Entity\EncryptionProfile */
+      $enc_profile = $this->entityManager->getStorage('encryption_profile')
         ->loadByProperties(array('service_default' => TRUE));
     }
 
     // Load the key.
-    $key_value = $this->key->getKeyValue($enc_config->getEncryptionKey());
+    $key_value = $this->key->getKeyValue($enc_profile->getEncryptionKey());
 
     // Load the encryption method.
-    $enc_method = $this->encryptManager->createInstance($enc_config->getEncryptionMethod());
+    $enc_method = $this->encryptManager->createInstance($enc_profile->getEncryptionMethod());
 
     // Return the encrypted string.
     return $enc_method->encrypt($text, $key_value);
@@ -85,23 +85,23 @@ class EncryptService implements EncryptServiceInterface {
    */
   public function decrypt($text, $inst_id = NULL) {
     if ($inst_id) {
-      /** @var $enc_config \Drupal\encrypt\Entity\EncryptionConfiguration */
-      if (!$enc_config = $this->entityManager->getStorage('encryption_configuration')
+      /** @var $enc_profile \Drupal\encrypt\Entity\EncryptionProfile */
+      if (!$enc_profile = $this->entityManager->getStorage('encryption_profile')
         ->load($inst_id)) {
         return FALSE;
       }
     } else {
       // Load the default.
-      /** @var $enc_config \Drupal\encrypt\Entity\EncryptionConfiguration */
-      $enc_config = $this->entityManager->getStorage('encryption_configuration')
+      /** @var $enc_profile \Drupal\encrypt\Entity\EncryptionProfile */
+      $enc_profile = $this->entityManager->getStorage('encryption_profile')
         ->loadByProperties(array('service_default' => TRUE));
     }
 
     // Load the key.
-    $key_value = $this->key->getKeyValue($enc_config->getEncryptionKey());
+    $key_value = $this->key->getKeyValue($enc_profile->getEncryptionKey());
 
     // Load the encryption method.
-    $enc_method = $this->encryptManager->createInstance($enc_config->getEncryptionMethod());
+    $enc_method = $this->encryptManager->createInstance($enc_profile->getEncryptionMethod());
 
     // Return the encrypted string.
     return $enc_method->decrypt($text, $key_value);

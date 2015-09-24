@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\encrypt\EncryptionConfigurationInterface.
+ * Contains Drupal\encrypt\EncryptionProfileInterface.
  */
 
 namespace Drupal\encrypt;
@@ -12,14 +12,7 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
 /**
  * Provides an interface for defining Title entities.
  */
-interface EncryptionConfigurationInterface extends ConfigEntityInterface {
-  /**
-   * Gets the encryption configurations key.
-   *
-   * @return \Drupal\key\Entity\Key
-   */
-  public function getEncryptionKey();
-
+interface EncryptionProfileInterface extends ConfigEntityInterface {
   /**
    * Gets the encryption configurations key.
    *

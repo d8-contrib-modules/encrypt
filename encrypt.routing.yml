@@ -14,44 +14,45 @@ encrypt.admin_index:
     _title: 'Security'
   requirements:
     _permission: 'access administration pages'
-# EncryptionConfiguration routing definition
-entity.encryption_configuration.collection:
-  path: '/admin/structure/encryption_configuration'
+
+# Encryption Profile routing definition
+entity.encryption_profile.collection:
+  path: '/admin/structure/encryption-profile'
   defaults:
-    _entity_list: 'encryption_configuration'
-    _title: 'Encryption Configuration'
+    _entity_list: 'encryption_profile'
+    _title: 'Encryption Profiles'
   requirements:
     _permission: 'administer site configuration'
 
-entity.encryption_configuration.add_form:
-  path: '/admin/structure/encryption_configuration/add'
+entity.encryption_profile.add_form:
+  path: '/admin/structure/encryption-profile/add'
   defaults:
-    _entity_form: 'encryption_configuration.add'
-    _title: 'Add Encryption Configuration'
+    _entity_form: 'encryption_profile.add'
+    _title: 'Add Encryption Profile'
   requirements:
     _permission: 'administer site configuration'
 
-entity.encryption_configuration.edit_form:
-  path: '/admin/structure/encryption_configuration/{encryption_configuration}'
+entity.encryption_profile.edit_form:
+  path: '/admin/structure/encryption-profile/{encryption_profile}'
   defaults:
-    _entity_form: 'encryption_configuration.edit'
-    _title: 'Edit Encryption Configuration'
+    _entity_form: 'encryption_profile.edit'
+    _title: 'Edit Encryption Profile'
   requirements:
     _permission: 'administer site configuration'
 
-entity.encryption_configuration.delete_form:
-  path: '/admin/structure/encryption_configuration/{encryption_configuration}/delete'
+entity.encryption_profile.delete_form:
+  path: '/admin/structure/encryption-profile/{encryption_profile}/delete'
   defaults:
-    _entity_form: 'encryption_configuration.delete'
-    _title: 'Delete Encryption Configuration'
+    _entity_form: 'encryption_profile.delete'
+    _title: 'Delete Encryption Profile'
   requirements:
     _permission: 'administer site configuration'
 
-entity.encryption_configuration.set_default:
-  path: '/admin/structure/encryption_configuration/{encryption_configuration}/default'
+entity.encryption_profile.set_default:
+  path: '/admin/structure/encryption-profile/{encryption_profile}/default'
   defaults:
-    _entity_form: 'encryption_configuration.default'
-    _title: 'Make Encryption Configuration Default'
+    _entity_form: 'encryption_profile.default'
+    _title: 'Make Encryption Profile Default'
   requirements:
     _permission: 'administer site configuration'
 

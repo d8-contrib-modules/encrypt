@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\encrypt\Controller\EncryptionConfigurationListBuilder.
+ * Contains Drupal\encrypt\Controller\EncryptionProfileListBuilder.
  */
 
 namespace Drupal\encrypt\Controller;
@@ -11,9 +11,9 @@ use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Provides a listing of Title entities.
+ * Provides a listing of encryption profile entities.
  */
-class EncryptionConfigurationListBuilder extends ConfigEntityListBuilder {
+class EncryptionProfileListBuilder extends ConfigEntityListBuilder {
   /**
    * {@inheritdoc}
    */
