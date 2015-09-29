@@ -101,15 +101,9 @@ class EncryptionProfileForm extends EntityForm {
       $keys[$key_id] = (string) $key_title;
     }
 
-    /** @var $config \Drupal\Core\Config\ImmutableConfig */
-    $config = $this->config_factory->get('encrypt.settings');
-
     $default_key = 'default';
-    $profile_keys = $config->get('profile_keys');
-    foreach ($profile_keys as $profile_key) {
-      if ($profile_key->encryption_profile == $encryption_profile->id()) {
-        $default_key = $profile_key->encryption_key;
-      }
+    if ($profile_key = $encryption_profile->getEncryptionKey()) {
+      $default_key = $profile_key;
     }
 
     $form['encryption_key'] = array(
@@ -141,29 +135,6 @@ class EncryptionProfileForm extends EntityForm {
   public function save(array $form, FormStateInterface $form_state) {
     $encryption_profile = $this->entity;
     $status = $encryption_profile->save();
-
-    // Let's save the keys.
-    $id = $encryption_profile->id();
-    /** @var $config \Drupal\Core\Config\ */
-    $config = $this->config_factory->getEditable('encrypt.settings');
-    $profile_keys = $config->get('profile_keys');
-    $new_keys = [];
-    $loaded = FALSE;
-    foreach ($profile_keys as $profile_key) {
-      if ($profile_key->encryption_profile == $id) {
-        $profile_key->encryption_key = $form_state->getValue('encryption_key');
-        $loaded = TRUE;
-      }
-      $new_keys[] = $profile_key;
-    }
-
-    if (!$loaded) {
-      $new_profile_key = NULL;
-      $new_profile_key->encryption_profile = $id;
-      $new_profile_key->encryption_key = $form_state->getValue('encryption_key');
-      $new_keys[] = $new_profile_key;
-    }
-    $config->set('profile_keys', $new_keys);
 
     if ($status) {
       drupal_set_message($this->t('Saved the %label encryption profile.', array(

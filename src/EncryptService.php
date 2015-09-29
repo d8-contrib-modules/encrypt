@@ -65,16 +65,23 @@ class EncryptService implements EncryptServiceInterface {
       }
     } else {
       // Load the default.
+      $enc_profiles = $this->entityManager->getStorage('encryption_profile')
+        ->loadByProperties(['service_default' => TRUE]);
       /** @var $enc_profile \Drupal\encrypt\Entity\EncryptionProfile */
-      $enc_profile = $this->entityManager->getStorage('encryption_profile')
-        ->loadByProperties(array('service_default' => TRUE));
+      $enc_profile = array_shift($enc_profiles);
     }
 
     // Load the key.
-    $key_value = $this->key->getKeyValue($enc_profile->getEncryptionKey());
+    $key_id = $enc_profile->getEncryptionKey();
+    if ($key_id != 'default') {
+      $key_value = $this->key->getKeyValue($key_id);
+    } else {
+      $key_value = $this->key->getDefaultKeyValue();
+    }
 
     // Load the encryption method.
-    $enc_method = $this->encryptManager->createInstance($enc_profile->getEncryptionMethod());
+    $enc_method = $enc_profile->getEncryptionMethod();
+    $enc_method = $this->encryptManager->createInstance($enc_method);
 
     // Return the encrypted string.
     return $enc_method->encrypt($text, $key_value);
@@ -92,16 +99,24 @@ class EncryptService implements EncryptServiceInterface {
       }
     } else {
       // Load the default.
-      /** @var $enc_profile \Drupal\encrypt\Entity\EncryptionProfile */
-      $enc_profile = $this->entityManager->getStorage('encryption_profile')
+      $enc_profiles = $this->entityManager->getStorage('encryption_profile')
         ->loadByProperties(array('service_default' => TRUE));
+      /** @var $enc_profile \Drupal\encrypt\Entity\EncryptionProfile */
+      $enc_profile = array_shift($enc_profiles);
     }
 
     // Load the key.
-    $key_value = $this->key->getKeyValue($enc_profile->getEncryptionKey());
+    $key_id = $enc_profile->getEncryptionKey();
+    if ($key_id != 'default') {
+      $key_value = $this->key->getKeyValue($key_id);
+    } else {
+      $key_value = $this->key->getDefaultKeyValue();
+    }
 
     // Load the encryption method.
-    $enc_method = $this->encryptManager->createInstance($enc_profile->getEncryptionMethod());
+    // Load the encryption method.
+    $enc_method = $enc_profile->getEncryptionMethod();
+    $enc_method = $this->encryptManager->createInstance($enc_method);
 
     // Return the encrypted string.
     return $enc_method->decrypt($text, $key_value);

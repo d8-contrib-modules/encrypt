@@ -14,11 +14,18 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
  */
 interface EncryptionProfileInterface extends ConfigEntityInterface {
   /**
-   * Gets the encryption configurations key.
+   * Gets the encryption configuration method.
    *
    * @return \Drupal\encrypt\EncryptionMethodInterface
    */
   public function getEncryptionMethod();
+
+  /**
+   * Gets the encryption profile key.
+   *
+   * @return \Drupal\key\KeyInterface
+   */
+  public function getEncryptionKey();
 
   /**
    * Gets if this encryption configuration is the default.

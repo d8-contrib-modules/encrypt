@@ -72,6 +72,13 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
   protected $service_default;
 
   /**
+   * The encryption key.
+   *
+   * @var string
+   */
+  protected $encryption_key;
+
+  /**
    * {@inheritdoc}
    */
   public function getEncryptionMethod() {
@@ -83,6 +90,13 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
    */
   public function getServiceDefault() {
     return $this->service_default;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getEncryptionKey() {
+    return $this->encryption_key;
   }
 
   /**
