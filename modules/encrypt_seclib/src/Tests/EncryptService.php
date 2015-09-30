@@ -63,7 +63,7 @@ class EncryptService extends WebTestBase {
 
     $this->verbose('Encrypted string: ' . $enc_string);
 
-    $this->assertEqual($enc_string, 'n76uUVe8NGZsV2WES4NOJOiCYgtGtYq7tfpcykwfkmI=', 'The encryption service is not properly processing');
+    $this->assertEqual($enc_string, 'xLAVoczg3Jl9JsL6U/uDhQ==&', 'The encryption service is not properly processing');
 
     // Test decryption service.
     $dec_string = \Drupal::service('encryption')->decrypt($enc_string, 'test_profile');
