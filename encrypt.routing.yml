@@ -1,12 +1,4 @@
 
-encrypt.encrypt_settings_form:
-  path: '/admin/config/security/encryption'
-  defaults:
-    _form: '\Drupal\encrypt\Form\EncryptSettingsForm'
-    _title: 'Encrypt Settings'
-  requirements:
-    _permission: 'administer encrypt'
-
 encrypt.admin_index:
   path: '/admin/config/security'
   defaults:
@@ -17,7 +9,7 @@ encrypt.admin_index:
 
 # Encryption Profile routing definition
 entity.encryption_profile.collection:
-  path: '/admin/structure/encryption-profile'
+  path: '/admin/config/security/encryption'
   defaults:
     _entity_list: 'encryption_profile'
     _title: 'Encryption Profiles'
@@ -25,7 +17,7 @@ entity.encryption_profile.collection:
     _permission: 'administer site configuration'
 
 entity.encryption_profile.add_form:
-  path: '/admin/structure/encryption-profile/add'
+  path: '/admin/config/security/encryption/profile/add'
   defaults:
     _entity_form: 'encryption_profile.add'
     _title: 'Add Encryption Profile'
@@ -33,7 +25,7 @@ entity.encryption_profile.add_form:
     _permission: 'administer site configuration'
 
 entity.encryption_profile.edit_form:
-  path: '/admin/structure/encryption-profile/{encryption_profile}'
+  path: '/admin/config/security/encryption/profile/{encryption_profile}'
   defaults:
     _entity_form: 'encryption_profile.edit'
     _title: 'Edit Encryption Profile'
@@ -41,7 +33,7 @@ entity.encryption_profile.edit_form:
     _permission: 'administer site configuration'
 
 entity.encryption_profile.delete_form:
-  path: '/admin/structure/encryption-profile/{encryption_profile}/delete'
+  path: '/admin/config/security/encryption/profile/{encryption_profile}/delete'
   defaults:
     _entity_form: 'encryption_profile.delete'
     _title: 'Delete Encryption Profile'
@@ -49,7 +41,7 @@ entity.encryption_profile.delete_form:
     _permission: 'administer site configuration'
 
 entity.encryption_profile.set_default:
-  path: '/admin/structure/encryption-profile/{encryption_profile}/default'
+  path: '/admin/config/security/encryption/profile/{encryption_profile}/default'
   defaults:
     _entity_form: 'encryption_profile.default'
     _title: 'Make Encryption Profile Default'

@@ -32,7 +32,7 @@ class EncryptEncryptionMethodPluginsTest extends \Drupal\simpletest\WebTestBase 
    * The declared encryption method appears on the add configuration page.
    */
   public function testPluginsAppearInList() {
-    $this->drupalGet('admin/structure/encryption-profile/add');
+    $this->drupalGet('admin/config/security/encryption/profile/add');
     // Check if the plugin exists.
     $this->assertOption('edit-encryption-method', 'phpseclib', t('Encryption method option is present.'));
     $this->assertText('PHP Secure Communications Library (phpseclib)', t('Encryption method text is present'));

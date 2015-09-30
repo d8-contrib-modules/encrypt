@@ -51,7 +51,7 @@ class EncryptService extends WebTestBase {
       'encryption_key' => 'testing_key',
       'encryption_method' => 'phpseclib',
     ];
-    $this->drupalPostForm('admin/structure/encryption-profile/add', $edit, t('Save'));
+    $this->drupalPostForm('admin/config/security/encryption/profile/add', $edit, t('Save'));
 
 
     // Test encryption service.

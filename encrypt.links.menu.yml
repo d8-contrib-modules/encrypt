@@ -9,5 +9,5 @@ entity.encryption_profile.collection:
   title: 'Encryption Profile'
   route_name: entity.encryption_profile.collection
   description: 'Encryption Profile listing'
-  parent: system.admin_structure
+  parent: encrypt.admin_index
 

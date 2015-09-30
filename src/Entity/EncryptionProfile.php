@@ -33,11 +33,11 @@ use Drupal\encrypt\EncryptionProfileInterface;
  *     "uuid" = "uuid"
  *   },
  *   links = {
- *     "canonical" = "/admin/structure/encryption-profile/{encryption_profile}",
- *     "edit-form" = "/admin/structure/encryption-profile/{encryption_profile}/edit",
- *     "delete-form" = "/admin/structure/encryption-profile/{encryption_profile}/delete",
- *     "collection" = "/admin/structure/encryption-profile",
- *     "set-default" = "/admin/structure/encryption-profile/{encryption_profile}/default",
+ *     "canonical" = "/admin/config/security/encryption/profile/{encryption_profile}",
+ *     "edit-form" = "/admin/config/security/encryption/profile/{encryption_profile}/edit",
+ *     "delete-form" = "/admin/config/security/encryption/profile/{encryption_profile}/delete",
+ *     "collection" = "/admin/config/security/encryption/profile",
+ *     "set-default" = "/admin/config/security/encryption/profile/{encryption_profile}/default",
  *   }
  * )
  */
