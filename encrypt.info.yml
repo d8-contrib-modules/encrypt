@@ -6,3 +6,4 @@ dependencies:
   - key
 version: 3.x
 type: module
+configure: encrypt.encrypt_settings_form
