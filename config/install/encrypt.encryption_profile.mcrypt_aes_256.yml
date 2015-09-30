@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - encrypt
+id: mcrypt_aes_256
+label: 'Mcrypt AES 256'
+encryption_method: mcrypt_aes_256
+service_default: true
+encryption_key: 'default'

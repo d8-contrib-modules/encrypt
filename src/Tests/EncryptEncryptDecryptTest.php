@@ -9,6 +9,7 @@ namespace Drupal\encrypt\Tests;
 class EncryptEncryptDecryptTest extends \Drupal\simpletest\WebTestBase {
 
   protected $profile = 'standard';
+  public static $modules = array('encrypt', 'key', 'dblog');
 
   public static function getInfo() {
     return [
@@ -18,72 +19,86 @@ class EncryptEncryptDecryptTest extends \Drupal\simpletest\WebTestBase {
     ];
   }
 
-  public /**
-   * Enable encrypt module.
+  /**
+   * Test encryption and decryption with the services default method.
    */
-  function setUp() {
-    parent::setUp('encrypt');
-  }
+  public function testDefaultEncryptDecrypt() {
+    // Stage a key and make default.
+    $user = $this->drupalCreateUser([], NULL, TRUE);
+    $this->drupalLogin($user);
+    $this->drupalGet('admin/config/security/key/add');
+    $edit = [
+      'key_provider' => 'config',
+    ];
+    $this->drupalPostAjaxForm(NULL, $edit, 'key_provider');
 
-  public /**
-   * Test encryption and decryption with the "None" method.
-   */
-  function testNoneEncryptDecrypt() {
-    // First, generate a random string to encrypt.
-    $random = $this->randomName(10);
+    $edit = [
+      'id' => 'testing_key',
+      'label' => 'Testing Key',
+      'key_provider' => 'config',
+      'key_settings[key_value]' => 'test this key out',
+    ];
+    $this->drupalPostForm(NULL, $edit, t('Save'));
 
-    // Encrypt the string.
-    $encrypted = encrypt($random, [], 'none');
-    $this->assertNotEqual($random, $encrypted, t('None: A value, encrypted, does not equal itself.'));
-    $this->assertTrue(strpos($encrypted, 'a:') === 0, t('None: The encrypted value is a serialized array.'));
+    // Set key as default.
+    $this->drupalGet('admin/config/security/key/manage/testing_key/default');
+    $this->drupalPostForm(NULL, [], 'Set Default');
 
-    // Since no actual encryption is being performed, ensure that the "encrypted" text is the same as the original.
-    $encryptedArray = unserialize($encrypted);
-    $this->assertEqual($random, $encryptedArray['text'], t('None: Initial value equals "encrypted" value.'));
-    $this->assertEqual($encryptedArray['method'], 'none', t('None: Encryption method stored correctly.'));
 
-    // Then, decrypt the encrypted string.
-    $decrypted = decrypt($encrypted, [], 'none');
-    $this->assertEqual($random, $decrypted, t('None: A value, decrypted, equals itself.'));
-  }
-
-  public /**
-   * Test encryption and decryption with the "Basic" method.
-   *
-   * Pretty much the same as the "None" tests. See that method for more detailed comments.
-   */
-  function testBasicEncryptDecrypt() {
-    $random = $this->randomName(10);
-    $encrypted = encrypt($random, [], 'default');
+    // Run encrypt test.
+    $random = $this->randomString(10);
+    $srv = \Drupal::service('encryption');
+    $encrypted = $srv->encrypt($random);
 
     // Test that the original value does not equal the encrypted value (i.e. that the data is actually being encrypted).
-    $this->assertTrue(strpos($encrypted, 'a:') === 0, t('Basic: The encrypted value is a serialized array.'));
-    $encryptedArray = unserialize($encrypted);
-    $this->assertNotEqual($random, $encryptedArray['text'], t('Basic: A value, encrypted, does not equal itself.'));
-    $this->assertEqual($encryptedArray['method'], 'default', t('Basic: Encryption method stored correctly.'));
+    $this->assertNotEqual($random, $encrypted, t('Default: A value, encrypted, does not equal itself.'));
 
-    $decrypted = decrypt($encrypted, [], 'default');
-    $this->assertEqual($random, $decrypted, t('Basic: A value, decrypted, equals itself.'));
+    $decrypted = $srv->decrypt($encrypted);
+    $this->assertEqual($random, $decrypted, t('Default: A value, decrypted, equals itself.'));
+
   }
 
-  public /**
+  /**
    * Test encryption and decryption with the "MCrypt" method.
    *
    * Pretty much the same as the "None" tests. See that method for more detailed comments.
    */
-  function testMCryptEncryptDecrypt() {
+  public function testMCryptEncryptDecrypt() {
     if (function_exists('mcrypt_encrypt')) {
-      $random = $this->randomName(10);
-      $encrypted = encrypt($random, [], 'mcrypt_rij_256');
+      // Stage a key and make default.
+      $user = $this->drupalCreateUser([], NULL, TRUE);
+      $this->drupalLogin($user);
+
+      $this->drupalGet('admin/config/security/key/add');
+      $edit = [
+        'key_provider' => 'config',
+      ];
+      $this->drupalPostAjaxForm(NULL, $edit, 'key_provider');
+
+      $edit = [
+        'id' => 'testing_key',
+        'label' => 'Testing Key',
+        'key_provider' => 'config',
+        'key_settings[key_value]' => 'test this key out',
+      ];
+      $this->drupalPostForm(NULL, $edit, t('Save'));
+
+      // Set key as default.
+      $this->drupalGet('admin/config/security/key/manage/testing_key/default');
+      $this->drupalPostForm(NULL, [], 'Set Default');
+
+
+      // Run encrypt test.
+      $srv = \Drupal::service('encryption');
+      $random = $this->randomString(10);
+      $encrypted = $srv->encrypt($random, 'mcrypt_aes_256');
 
       // Test that the original value does not equal the encrypted value (i.e. that the data is actually being encrypted).
-      $this->assertTrue(strpos($encrypted, 'a:') === 0, t('MCrypt: The encrypted value is a serialized array.'));
-      $encryptedArray = unserialize($encrypted);
-      $this->assertNotEqual($random, $encryptedArray['text'], t('MCrypt: A value, encrypted, does not equal itself.'));
-      $this->assertEqual($encryptedArray['method'], 'mcrypt_rij_256', t('MCrypt: Encryption method stored correctly.'));
+      $this->assertNotEqual($random, $encrypted, t('MCrypt: A value, encrypted, does not equal itself.'));
 
-      $decrypted = decrypt($encrypted, [], 'mcrypt_rij_256');
+      $decrypted = $srv->decrypt($encrypted, 'mcrypt_aes_256');
       $this->assertEqual($random, $decrypted, t('MCrypt: A value, decrypted, equals itself.'));
+
     }
     else {
       debug('MCrypt extension not present. Skipping tests.');
