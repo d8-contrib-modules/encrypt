@@ -16,7 +16,8 @@ use Drupal\simpletest\WebTestBase;
  */
 class EncryptService extends WebTestBase {
 
-  public static $modules = array('key', 'encrypt_seclib', 'dblog');
+  public static $modules = array('composer_manager', 'key', 'encrypt_seclib', 'dblog');
+  protected $profile = 'standard';
 
   /**
    * Test both encrypt and decrypt functions.
@@ -24,31 +25,33 @@ class EncryptService extends WebTestBase {
   function testEncryptAndDecrypt() {
 
     // Create user with permission to create policy.
-    $user1 = $this->drupalCreateUser(array('administer site configuration', 'administer encrypt'));
+    $user1 = $this->drupalCreateUser([], NULL, TRUE);
     $this->drupalLogin($user1);
 
     // Create new simple key.
-    $this->drupalGet('admin/config/system/key/add');
+    $this->drupalGet('admin/config/security/key/add');
     $edit = [
-      'key_type' => 'key_type_simple',
+      'key_provider' => 'config',
     ];
-    $this->drupalPostAjaxForm(NULL, $edit, 'key_type');
+    $this->drupalPostAjaxForm(NULL, $edit, 'key_provider');
 
     $edit = [
       'id' => 'testing_key',
       'label' => 'Testing Key',
-      'key_type' => 'key_type_simple',
-      'key_settings[simple_key_value]' => 'test this key out',
+      'key_provider' => 'config',
+      'key_settings[key_value]' => 'test this key out',
     ];
     $this->drupalPostForm(NULL, $edit, t('Save'));
 
 
     // Change encrypt settings.
     $edit = [
+      'id' => 'test_profile',
+      'label' => 'test enc profile',
       'encryption_key' => 'testing_key',
-      'encryption_method' => 'mcrypt_aes_256',
+      'encryption_method' => 'phpseclib',
     ];
-    $this->drupalPostForm('admin/config/security/encryption', $edit, t('Save configuration'));
+    $this->drupalPostForm('admin/structure/encryption-profile/add', $edit, t('Save'));
 
 
     // Test encryption service.
@@ -56,14 +59,14 @@ class EncryptService extends WebTestBase {
 
     $this->verbose('Testing string: ' . $test_string);
 
-    $enc_string = \Drupal::service('encryption')->encrypt($test_string);
+    $enc_string = \Drupal::service('encryption')->encrypt($test_string, 'test_profile');
 
     $this->verbose('Encrypted string: ' . $enc_string);
 
     $this->assertEqual($enc_string, 'n76uUVe8NGZsV2WES4NOJOiCYgtGtYq7tfpcykwfkmI=', 'The encryption service is not properly processing');
 
     // Test decryption service.
-    $dec_string = \Drupal::service('encryption')->decrypt($enc_string);
+    $dec_string = \Drupal::service('encryption')->decrypt($enc_string, 'test_profile');
 
     $this->verbose('Decrypted string: ' . $dec_string);
 
