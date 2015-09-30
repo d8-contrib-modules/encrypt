@@ -1,10 +1,8 @@
 name: Encrypt
-description: 'Provides an API for two-way encryption'
+description: 'Provides an API for two-way encryption.'
 core: 8.x
 package: Encryption
 dependencies:
   - key
-version: 8.x-3.0
-project: encrypt
-datestamp: '1412192667'
+version: 3.x
 type: module
