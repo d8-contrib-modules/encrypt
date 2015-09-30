@@ -25,6 +25,11 @@ git clone --depth 1 https://github.com/d8-contrib-modules/key.git
 # We need to perform the composer manager install for seclib submodule
 cd "$DRUPAL_TI_DRUPAL_DIR"
 drush dl composer_manager -y
+
+# We need to enable seclib so it shows up
+drush en encrypt_seclib -y
+
+drush en composer_manager -y
 cd "$DRUPAL_TI_DRUPAL_DIR/$DRUPAL_TI_MODULES_PATH/composer_manager"
 php scripts/init.php
 cd "$DRUPAL_TI_DRUPAL_DIR"
