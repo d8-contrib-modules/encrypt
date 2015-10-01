@@ -96,6 +96,7 @@ before_script:
   # We run our script to add module dependencies
   - drupal-ti --include drupal_ti/before/before_script.sh
   - drupal-ti before_script
+  - drupal-ti --include drupal_ti/after/before_script.sh
 
 script:
   - drupal-ti script
