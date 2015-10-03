@@ -5,6 +5,5 @@ package: Encryption
 dependencies:
   - encrypt
   - composer_manager
-version: 8.x-1.0
-project: encrypt_seclib
+version: 1.x
 type: module
