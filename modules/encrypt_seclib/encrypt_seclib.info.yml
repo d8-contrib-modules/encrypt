@@ -1,7 +1,7 @@
 name: Encrypt - PHPSecLib Encryption
 description: 'PHPSecLib Encryption for the Encrypt module.'
 core: 8.x
-package: Encryption
+package: Security
 dependencies:
   - encrypt
   - composer_manager
