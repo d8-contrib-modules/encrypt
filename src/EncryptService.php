@@ -8,7 +8,7 @@
 namespace Drupal\encrypt;
 
 use Drupal\Core\Entity\EntityManagerInterface;
-use Drupal\key\KeyManager;
+use Drupal\key\KeyRepository;
 
 /**
  * Class EncryptService.
@@ -28,7 +28,7 @@ class EncryptService implements EncryptServiceInterface {
   protected $encryptManager;
 
   /**
-   * @var \Drupal\key\KeyManager
+   * @var \Drupal\key\KeyRepository
    */
   protected $key;
 
@@ -36,9 +36,9 @@ class EncryptService implements EncryptServiceInterface {
   /**
    * @param \Drupal\Core\Entity\EntityManagerInterface $entityManager
    * @param \Drupal\encrypt\EncryptionMethodManager $manager
-   * @param \Drupal\key\KeyManager $key
+   * @param \Drupal\key\KeyRepository $key
    */
-  public function __construct(EntityManagerInterface $entityManager, EncryptionMethodManager $encryptManager, KeyManager $key) {
+  public function __construct(EntityManagerInterface $entityManager, EncryptionMethodManager $encryptManager, KeyRepository $key) {
     $this->entityManager = $entityManager;
     $this->encryptManager = $encryptManager;
     $this->key = $key;
@@ -74,9 +74,9 @@ class EncryptService implements EncryptServiceInterface {
     // Load the key.
     $key_id = $enc_profile->getEncryptionKey();
     if ($key_id != 'default') {
-      $key_value = $this->key->getKeyValue($key_id);
+      $key_value = $this->key->getKey($key_id)->getKeyValue();
     } else {
-      $key_value = $this->key->getDefaultKeyValue();
+      $key_value = $this->key->getKey()->getKeyValue();
     }
 
     // Load the encryption method.
@@ -108,9 +108,9 @@ class EncryptService implements EncryptServiceInterface {
     // Load the key.
     $key_id = $enc_profile->getEncryptionKey();
     if ($key_id != 'default') {
-      $key_value = $this->key->getKeyValue($key_id);
+      $key_value = $this->key->getKey($key_id)->getKeyValue();
     } else {
-      $key_value = $this->key->getDefaultKeyValue();
+      $key_value = $this->key->getKey()->getKeyValue();
     }
 
     // Load the encryption method.
