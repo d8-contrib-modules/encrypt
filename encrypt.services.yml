@@ -1,7 +1,7 @@
 services:
   encryption:
     class: Drupal\encrypt\EncryptService
-    arguments: ['@entity.manager', '@plugin.manager.encrypt.encryption_methods', '@key_manager']
+    arguments: ['@entity.manager', '@plugin.manager.encrypt.encryption_methods', '@key_repository']
 
   plugin.manager.encrypt.encryption_methods:
     class: Drupal\encrypt\EncryptionMethodManager

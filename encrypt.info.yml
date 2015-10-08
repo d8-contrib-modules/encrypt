@@ -1,7 +1,7 @@
 name: Encrypt
 description: 'Provides an API for two-way encryption.'
 core: 8.x
-package: Encryption
+package: Security
 dependencies:
   - key
 version: 3.x

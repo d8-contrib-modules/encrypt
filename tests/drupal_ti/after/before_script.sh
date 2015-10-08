@@ -16,9 +16,14 @@ cd "$DRUPAL_TI_DRUPAL_DIR"
 # We need to enable seclib so it shows up
 drush en encrypt_seclib -y
 
-drush en composer_manager -y
+# Change to the Drupal directory
 cd "$DRUPAL_TI_DRUPAL_DIR/$DRUPAL_TI_MODULES_PATH/composer_manager"
+echo "running composer manager init script"
 php scripts/init.php
-cd "$DRUPAL_TI_DRUPAL_DIR"
-composer drupal-install
 
+cd "$DRUPAL_TI_DRUPAL_DIR"
+# list out commands for debugging
+# composer
+composer drupal-rebuild
+# https://github.com/composer/composer/issues/1314
+composer drupal-update --no-interaction
