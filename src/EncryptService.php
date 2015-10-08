@@ -7,6 +7,7 @@
 
 namespace Drupal\encrypt;
 
+use Behat\Mink\Exception\Exception;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\key\KeyRepository;
 
@@ -61,7 +62,7 @@ class EncryptService implements EncryptServiceInterface {
       /** @var $enc_profile \Drupal\encrypt\Entity\EncryptionProfile */
       if (!$enc_profile = $this->entityManager->getStorage('encryption_profile')
         ->load($inst_id)) {
-        return FALSE;
+        throw new \Exception('Encryption profile was not found.');
       }
     } else {
       // Load the default.
@@ -69,6 +70,10 @@ class EncryptService implements EncryptServiceInterface {
         ->loadByProperties(['service_default' => TRUE]);
       /** @var $enc_profile \Drupal\encrypt\Entity\EncryptionProfile */
       $enc_profile = array_shift($enc_profiles);
+    }
+
+    if (!$enc_profile) {
+      throw new \Exception('There is no default encryption profile.');
     }
 
     // Load the key.
@@ -95,7 +100,7 @@ class EncryptService implements EncryptServiceInterface {
       /** @var $enc_profile \Drupal\encrypt\Entity\EncryptionProfile */
       if (!$enc_profile = $this->entityManager->getStorage('encryption_profile')
         ->load($inst_id)) {
-        return FALSE;
+        throw new \Exception('Encryption profile was not found.');
       }
     } else {
       // Load the default.
@@ -103,6 +108,10 @@ class EncryptService implements EncryptServiceInterface {
         ->loadByProperties(array('service_default' => TRUE));
       /** @var $enc_profile \Drupal\encrypt\Entity\EncryptionProfile */
       $enc_profile = array_shift($enc_profiles);
+    }
+
+    if (!$enc_profile) {
+      throw new \Exception('There is no default encryption profile.');
     }
 
     // Load the key.

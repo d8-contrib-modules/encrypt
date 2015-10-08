@@ -11,7 +11,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\encrypt\EncryptService;
-use Drupal\key\KeyManager;
+use Drupal\key\KeyRepository;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -27,11 +27,11 @@ class EncryptionProfileForm extends EntityForm {
   protected $config_factory;
 
   /**
-   * KeyManager definition.
+   * KeyRepository definition.
    *
-   * @var \Drupal\key\KeyManager
+   * @var \Drupal\key\KeyRepository
    */
-  protected $key_manager;
+  protected $key_repository;
 
   /**
    * EncryptService definition.
@@ -45,14 +45,14 @@ class EncryptionProfileForm extends EntityForm {
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
-   * @param \Drupal\Key\KeyManager $key_manager
+   * @param \Drupal\Key\KeyRepository $key_repository
    *   The ConditionManager for building the visibility UI.
    * @param \Drupal\Encrypt\EncryptService $encrypt_service
    *   The lazy context repository service.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, KeyManager $key_manager, EncryptService $encrypt_service) {
+  public function __construct(ConfigFactoryInterface $config_factory, KeyRepository $key_repository, EncryptService $encrypt_service) {
     $this->config_factory = $config_factory;
-    $this->key_manager = $key_manager;
+    $this->key_repository = $key_repository;
     $this->encrypt_service = $encrypt_service;
   }
 
@@ -62,7 +62,7 @@ class EncryptionProfileForm extends EntityForm {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('config.factory'),
-      $container->get('key_manager'),
+      $container->get('key_repository'),
       $container->get('encryption')
     );
   }
@@ -95,7 +95,7 @@ class EncryptionProfileForm extends EntityForm {
 
     $keys = ['default' => 'System Default'];
     /** @var $key \Drupal\key\Entity\KeyInterface */
-    foreach ($this->key_manager->getKeys() as $key) {
+    foreach ($this->key_repository->getKeys() as $key) {
       $key_id = $key->id();
       $key_title = $key->label();
       $keys[$key_id] = (string) $key_title;

@@ -19,24 +19,21 @@ class EncryptEncryptDecryptTest extends \Drupal\simpletest\WebTestBase {
     ];
   }
 
-  /**
-   * Test encryption and decryption with the services default method.
-   */
-  public function testDefaultEncryptDecrypt() {
+  protected function stageTest() {
     // Stage a key and make default.
     $user = $this->drupalCreateUser([], NULL, TRUE);
     $this->drupalLogin($user);
     $this->drupalGet('admin/config/security/key/add');
     $edit = [
-      'key_provider' => 'config',
+    'key_provider' => 'config',
     ];
     $this->drupalPostAjaxForm(NULL, $edit, 'key_provider');
 
     $edit = [
-      'id' => 'testing_key',
-      'label' => 'Testing Key',
-      'key_provider' => 'config',
-      'key_settings[key_value]' => 'mustbesixteenbit',
+    'id' => 'testing_key',
+    'label' => 'Testing Key',
+    'key_provider' => 'config',
+    'key_settings[key_value]' => 'mustbesixteenbit',
     ];
     $this->drupalPostForm(NULL, $edit, t('Save'));
 
@@ -44,6 +41,27 @@ class EncryptEncryptDecryptTest extends \Drupal\simpletest\WebTestBase {
     $this->drupalGet('admin/config/security/key/manage/testing_key/default');
     $this->drupalPostForm(NULL, [], 'Set Default');
 
+    // Setup an initial encryption profile and default it.
+    $this->drupalGet('admin/config/security/encryption/profile/add');
+    $edit = [
+      'id' => 'testing_profile',
+      'label' => 'Testing profile',
+      'encryption_key' => 'testing_key',
+      'encryption_method' => 'mcrypt_aes_256',
+    ];
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+
+    // And default the enc profile.
+    $this->drupalGet('admin/config/security/encryption/profile/testing_profile/default');
+    $this->drupalPostForm(NULL, [], t('Set Default'));
+  }
+
+  /**
+   * Test encryption and decryption with the services default method.
+   */
+  public function testDefaultEncryptDecrypt() {
+
+    $this->stageTest();
 
     // Run encrypt test.
     $random = $this->randomString(10);
@@ -65,38 +83,17 @@ class EncryptEncryptDecryptTest extends \Drupal\simpletest\WebTestBase {
    */
   public function testMCryptEncryptDecrypt() {
     if (function_exists('mcrypt_encrypt')) {
-      // Stage a key and make default.
-      $user = $this->drupalCreateUser([], NULL, TRUE);
-      $this->drupalLogin($user);
-
-      $this->drupalGet('admin/config/security/key/add');
-      $edit = [
-        'key_provider' => 'config',
-      ];
-      $this->drupalPostAjaxForm(NULL, $edit, 'key_provider');
-
-      $edit = [
-        'id' => 'testing_key',
-        'label' => 'Testing Key',
-        'key_provider' => 'config',
-        'key_settings[key_value]' => 'mustbesixteenbit',
-      ];
-      $this->drupalPostForm(NULL, $edit, t('Save'));
-
-      // Set key as default.
-      $this->drupalGet('admin/config/security/key/manage/testing_key/default');
-      $this->drupalPostForm(NULL, [], 'Set Default');
-
+      $this->stageTest();
 
       // Run encrypt test.
       $srv = \Drupal::service('encryption');
       $random = $this->randomString(10);
-      $encrypted = $srv->encrypt($random, 'mcrypt_aes_256');
+      $encrypted = $srv->encrypt($random, 'testing_profile');
 
       // Test that the original value does not equal the encrypted value (i.e. that the data is actually being encrypted).
       $this->assertNotEqual($random, $encrypted, t('MCrypt: A value, encrypted, does not equal itself.'));
 
-      $decrypted = $srv->decrypt($encrypted, 'mcrypt_aes_256');
+      $decrypted = $srv->decrypt($encrypted, 'testing_profile');
       $this->assertEqual($random, $decrypted, t('MCrypt: A value, decrypted, equals itself.'));
 
     }
