@@ -20,5 +20,10 @@ drush en composer_manager -y
 cd "$DRUPAL_TI_DRUPAL_DIR/$DRUPAL_TI_MODULES_PATH/composer_manager"
 php scripts/init.php
 cd "$DRUPAL_TI_DRUPAL_DIR"
-composer drupal-install
+# list out commands for debugging
+# composer
+composer drupal-rebuild
+# https://github.com/composer/composer/issues/1314
+composer drupal-update --no-interaction
+
 
