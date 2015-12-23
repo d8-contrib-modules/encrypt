@@ -25,19 +25,19 @@ use Drupal\encrypt\EncryptionProfileInterface;
  *       "default" = "Drupal\encrypt\Form\EncryptionProfileDefaultForm"
  *     }
  *   },
- *   config_prefix = "encryption_profile",
- *   admin_permission = "administer site configuration",
+ *   config_prefix = "profile",
+ *   admin_permission = "administer encrypt",
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "label",
  *     "uuid" = "uuid"
  *   },
  *   links = {
- *     "canonical" = "/admin/config/security/encryption/profile/{encryption_profile}",
- *     "edit-form" = "/admin/config/security/encryption/profile/{encryption_profile}/edit",
- *     "delete-form" = "/admin/config/security/encryption/profile/{encryption_profile}/delete",
- *     "collection" = "/admin/config/security/encryption/profile",
- *     "set-default" = "/admin/config/security/encryption/profile/{encryption_profile}/default",
+ *     "canonical" = "/admin/config/system/encryption/profile/{encryption_profile}",
+ *     "add-form" = "/admin/config/system/encryption/profile/add",
+ *     "edit-form" = "/admin/config/system/encryption/profile/{encryption_profile}/edit",
+ *     "delete-form" = "/admin/config/system/encryption/profile/{encryption_profile}/delete",
+ *     "collection" = "/admin/config/system/encryption/profile",
  *   }
  * )
  */
@@ -64,14 +64,6 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
   protected $encryption_method;
 
   /**
-   * If the profile is to be the default encryption config used for the
-   * service.
-   *
-   * @var boolean
-   */
-  protected $service_default;
-
-  /**
    * The encryption key.
    *
    * @var string
@@ -88,30 +80,8 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
   /**
    * {@inheritdoc}
    */
-  public function getServiceDefault() {
-    return $this->service_default;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getEncryptionKey() {
     return $this->encryption_key;
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function setServiceDefault() {
-    $entities = \Drupal::entityManager()
-      ->getStorage('encryption_profile')
-      ->loadByProperties(['service_default'=>TRUE]);
-    foreach ($entities as $entity) {
-      $entity->service_default = FALSE;
-      $entity->save();
-    }
-
-    $this->service_default = TRUE;
-    $this->save();
-  }
 }

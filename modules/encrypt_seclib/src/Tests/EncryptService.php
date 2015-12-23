@@ -29,7 +29,7 @@ class EncryptService extends WebTestBase {
     $this->drupalLogin($user1);
 
     // Create new simple key.
-    $this->drupalGet('admin/config/security/key/add');
+    $this->drupalGet('admin/config/system/keys/add');
     $edit = [
       'key_provider' => 'config',
     ];
@@ -39,7 +39,7 @@ class EncryptService extends WebTestBase {
       'id' => 'testing_key',
       'label' => 'Testing Key',
       'key_provider' => 'config',
-      'key_settings[key_value]' => 'mustbesixteenbit',
+      'key_provider_settings[key_value]' => 'mustbesixteenbit',
     ];
     $this->drupalPostForm(NULL, $edit, t('Save'));
 
@@ -51,7 +51,7 @@ class EncryptService extends WebTestBase {
       'encryption_key' => 'testing_key',
       'encryption_method' => 'phpseclib',
     ];
-    $this->drupalPostForm('admin/config/security/encryption/profile/add', $edit, t('Save'));
+    $this->drupalPostForm('admin/config/system/encryption/profile/add', $edit, t('Save'));
 
 
     // Test encryption service.

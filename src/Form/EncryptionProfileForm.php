@@ -62,7 +62,7 @@ class EncryptionProfileForm extends EntityForm {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('config.factory'),
-      $container->get('key_repository'),
+      $container->get('key.repository'),
       $container->get('encryption')
     );
   }
@@ -72,6 +72,12 @@ class EncryptionProfileForm extends EntityForm {
    */
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
+
+    $keys = $this->key_repository->getKeys();
+
+    if (empty($keys)) {
+      drupal_set_message('No system keys (admin/config/system/key) are installed to manage encryption profiles.');
+    }
 
     /** @var $encryption_profile \Drupal\encrypt\Entity\EncryptionProfile */
     $encryption_profile = $this->entity;
@@ -93,15 +99,13 @@ class EncryptionProfileForm extends EntityForm {
       '#disabled' => !$encryption_profile->isNew(),
     );
 
-    $keys = ['default' => 'System Default'];
     /** @var $key \Drupal\key\Entity\KeyInterface */
-    foreach ($this->key_repository->getKeys() as $key) {
+    foreach ($keys as $key) {
       $key_id = $key->id();
       $key_title = $key->label();
       $keys[$key_id] = (string) $key_title;
     }
 
-    $default_key = 'default';
     if ($profile_key = $encryption_profile->getEncryptionKey()) {
       $default_key = $profile_key;
     }
@@ -111,7 +115,8 @@ class EncryptionProfileForm extends EntityForm {
       '#title' => $this->t('Encryption Key'),
       '#description' => $this->t('Select the key used for encryption.'),
       '#options' => $keys,
-      '#default_value' => $default_key,
+      '#default_value' => (empty($default_key)?NULL:$default_key),
+      '#required' => TRUE
     );
 
     $enc_methods = [];

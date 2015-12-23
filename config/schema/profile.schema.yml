@@ -1,4 +1,4 @@
-encrypt.encryption_profile.*:
+encrypt.profile.*:
   type: config_entity
   label: 'Encrypt Profile'
   mapping:
@@ -13,9 +13,6 @@ encrypt.encryption_profile.*:
     encryption_method:
       type: string
       label: 'Encryption method selected for encryption profile'
-    service_default:
-      type: boolean
-      label: 'Yes/no if encryption profile is the default'
     encryption_key:
       type: string
       label: 'Key ID for encryption profile'

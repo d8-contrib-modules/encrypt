@@ -20,11 +20,15 @@ class McryptAES256Encryption extends PluginBase implements EncryptionMethodInter
   /**
    * @return mixed
    */
-  public function getDependencies() {
+  public function checkDependencies($text = NULL, $key = NULL) {
     $errors = array();
 
     if (!function_exists('mcrypt_encrypt')) {
       $errors[] = t('MCrypt library not installed.');
+    }
+
+    if (!empty($key) and !in_array(strlen($key), [16, 24, 32])) {
+      $errors[] = t('Key length must be 16, 24, or 32 characters long.');
     }
 
     return $errors;

@@ -26,10 +26,13 @@ interface EncryptServiceInterface {
    * @param string $text
    *  The plain text to encrypt.
    *
+   * @param string $instance_id
+   *  The encryption profile ID linked to Drupal\encrypt\Entity\EncryptionProfile.
+   *
    * return string
    *  The encrypted string.
    */
-  function encrypt($text);
+  function encrypt($text, $instance_id);
 
   /**
    * Main decrypt function.
@@ -37,8 +40,11 @@ interface EncryptServiceInterface {
    * @param string $text
    *  The encrypted text to decrypt.
    *
+   * @param string $instance_id
+   *  The encryption profile ID linked to Drupal\encrypt\Entity\EncryptionProfile.
+   *
    * return string
    *  The decrypted plain string.
    */
-  function decrypt($text);
+  function decrypt($text, $instance_id);
 }

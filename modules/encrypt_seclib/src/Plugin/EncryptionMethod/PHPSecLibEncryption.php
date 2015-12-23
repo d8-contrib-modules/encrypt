@@ -62,7 +62,12 @@ class PHPSecLibEncryption extends PluginBase implements EncryptionMethodInterfac
   /**
    * @return mixed
    */
-  public function getDependencies() {
-    return array();
+  public function checkDependencies($text = NULL, $key = NULL) {
+    $errors = [];
+    // Check for composer class.
+    if (!class_exists('phpseclib\Crypt\AES')) {
+      $errors[] = 'PHPSecLib is missing. Please ensure proper installation with Composer Manager.';
+    }
+    return $errors;
   }
 }
