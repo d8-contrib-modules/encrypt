@@ -27,16 +27,4 @@ interface EncryptionProfileInterface extends ConfigEntityInterface {
    */
   public function getEncryptionKey();
 
-  /**
-   * Gets if this encryption configuration is the default.
-   *
-   * @return boolean
-   */
-  public function getServiceDefault();
-
-  /**
-   * Sets the encryption configuration to be the default.
-   *
-   */
-  public function setServiceDefault();
 }

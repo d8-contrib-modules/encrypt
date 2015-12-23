@@ -1,13 +1,7 @@
-encrypt.admin_index:
-  title: Security
-  description: 'Configuring security settings'
-  parent: system.admin_config
-  route_name: encrypt.admin_index
-
 # Title menu items definition
 entity.encryption_profile.collection:
   title: 'Encryption Profile'
   route_name: entity.encryption_profile.collection
   description: 'Encryption Profile listing'
-  parent: encrypt.admin_index
+  parent: system.admin_config_system
 
