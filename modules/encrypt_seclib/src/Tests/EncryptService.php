@@ -36,10 +36,11 @@ class EncryptService extends WebTestBase {
     $this->drupalPostAjaxForm(NULL, $edit, 'key_provider');
 
     $edit = [
-      'id' => 'testing_key',
-      'label' => 'Testing Key',
-      'key_provider' => 'config',
-      'key_provider_settings[key_value]' => 'mustbesixteenbit',
+        'id' => 'testing_key',
+        'label' => 'Testing Key',
+        'key_type' => 'authentication',
+        'key_provider' => 'config',
+        'key_input_settings[key_value]' => 'mustbesixteenbit',
     ];
     $this->drupalPostForm(NULL, $edit, t('Save'));
 
