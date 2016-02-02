@@ -17,15 +17,15 @@ It requires a key, which is provided by the Key module. To manage keys, visit `a
 
 ## Use of Services
 
-After configuring the service, the service provides the ability to encrypt and decrypt.
+After configuring the service, the service provides the ability to encrypt and decrypt using your encryption profile (machine name).
 
 ### Encrypt
 
-`Drupal::service('encryption')->encrypt($string);`
+`Drupal::service('encryption')->encrypt($string, $encryption_profile);`
 
 
 ### Decrypt
 
-`Drupal::service('encryption')->decrypt($string);`
+`Drupal::service('encryption')->decrypt($string, $encryption_profile);`
 
 
