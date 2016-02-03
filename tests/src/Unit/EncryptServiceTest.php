@@ -28,13 +28,6 @@ class EncryptServiceTest extends UnitTestCase {
   protected $encryptionProfile;
 
   /**
-   * A mocked EntityManager.
-   *
-   * @var \Drupal\Core\Entity\EntityManagerInterface|\PHPUnit_Framework_MockObject_MockObject
-   */
-  protected $entityManager;
-
-  /**
    * A mocked EncryptionMethodManager.
    *
    * @var \Drupal\encrypt\EncryptionMethodManager|\PHPUnit_Framework_MockObject_MockObject
@@ -47,13 +40,6 @@ class EncryptServiceTest extends UnitTestCase {
    * @var \Drupal\key\KeyRepository|\PHPUnit_Framework_MockObject_MockObject
    */
   protected $keyRepository;
-
-  /**
-   * A mocked Key entity.
-   *
-   * @var \Drupal\key\Entity\Key|\PHPUnit_Framework_MockObject_MockObject
-   */
-  protected $key;
 
   /**
    * A mocked EncryptionMethod plugin.
@@ -73,58 +59,20 @@ class EncryptServiceTest extends UnitTestCase {
       ->disableOriginalConstructor()
       ->getMock();
 
-    // Set up a mock EncryptionMethod plugin.
-    $this->encryptionMethod = $this->getMockBuilder('\Drupal\encrypt\EncryptionMethodInterface')
-      ->disableOriginalConstructor()
-      ->getMock();
-
-    // Set up a mock EntityManager.
-    $this->entityManager = $this->getMockBuilder('\Drupal\Core\Entity\EntityManagerInterface')
-      ->disableOriginalConstructor()
-      ->getMock();
-
-    // Mock the Entity storage layer.
-    $entity_storage = $this->getMock('Drupal\Core\Entity\EntityStorageInterface');
-
-    // Expect the entity storage to return a EncryptionProfile entity.
-    $entity_storage->expects($this->any())
-      ->method('load')
-      ->will($this->returnValue($this->encryptionProfile));
-
-    // Set up expectations for the entity manager.
-    $this->entityManager->expects($this->any())
-      ->method('getStorage')
-      ->will($this->returnValue($entity_storage));
-
     // Set up a mock EncryptionMethodManager.
     $this->encryptManager = $this->getMockBuilder('\Drupal\encrypt\EncryptionMethodManager')
       ->disableOriginalConstructor()
       ->getMock();
-
-    // Set up expectations for the encryption manager.
-    $this->encryptManager->expects($this->any())
-      ->method('createInstance')
-      ->with($this->equalTo('test_encryption_method'))
-      ->will($this->returnValue($this->encryptionMethod));
 
     // Set up a mock KeyRepository.
     $this->keyRepository = $this->getMockBuilder('\Drupal\key\KeyRepository')
       ->disableOriginalConstructor()
       ->getMock();
 
-    // Set up a mock KeyRepository.
-    $this->key = $this->getMockBuilder('\Drupal\key\Entity\Key')
+    // Set up a mock EncryptionMethod plugin.
+    $this->encryptionMethod = $this->getMockBuilder('\Drupal\encrypt\EncryptionMethodInterface')
       ->disableOriginalConstructor()
       ->getMock();
-
-    // Set up expectations for the key and key repository.
-    $this->key->expects($this->any())
-      ->method('getKeyValue')
-      ->will($this->returnValue("mustbesixteenbit"));
-    $this->keyRepository->expects($this->any())
-      ->method('getKey')
-      ->with("test_encryption_key")
-      ->will($this->returnValue($this->key));
   }
 
   /**
@@ -146,7 +94,6 @@ class EncryptServiceTest extends UnitTestCase {
       ->will($this->returnValue($definitions));
 
     $service = new EncryptService(
-      $this->entityManager,
       $this->encryptManager,
       $this->keyRepository
     );
@@ -160,120 +107,36 @@ class EncryptServiceTest extends UnitTestCase {
    *
    * @covers ::__construct
    * @covers ::encrypt
-   * @covers ::loadEncryptionProfile
-   * @covers ::loadEncryptionMethod
-   * @covers ::loadEncryptionProfileKey
    */
   public function testEncrypt() {
     // Set up a mock for the EncryptService class to mock some methods.
     $encrypt_service = $this->getMockBuilder('\Drupal\encrypt\EncryptService')
       ->setMethods([
-        'loadEncryptionProfile',
-        'loadEncryptionMethod',
-        'loadEncryptionProfileKey',
-        'checkDependencies',
-      ]
+        'getEncryptionKeyValue',
+        'getEncryptionMethod',
+        ]
       )
       ->setConstructorArgs(array(
-        $this->entityManager,
         $this->encryptManager,
         $this->keyRepository,
       ))
       ->getMock();
 
-    // Mock the methods on EncryptService that are out of scope for this test.
-    $this->encryptionProfile->expects($this->once())
-      ->method('getEncryptionMethod')
-      ->will($this->returnValue("test_encryption_method"));
-    $this->encryptionProfile->expects($this->once())
-      ->method('getEncryptionKey')
-      ->will($this->returnValue("test_encryption_key"));
-
     // Set up expectations for encryption method.
-    $this->encryptionMethod->expects($this->once())
-      ->method('checkDependencies')
-      ->will($this->returnValue(array()));
     $this->encryptionMethod->expects($this->once())
       ->method('encrypt')
       ->will($this->returnValue("encrypted_text"));
 
-    $encrypt_service->expects($this->any())
-      ->method('loadEncryptionProfile')
-      ->with($this->equalTo('test_encryption_profile'))
-      ->will($this->returnValue($this->encryptionProfile));
+    $encrypt_service->expects($this->once())
+      ->method('getEncryptionKeyValue')
+      ->will($this->returnValue('encryption_key'));
 
-    $encrypt_service->expects($this->any())
-      ->method('loadEncryptionMethod')
-      ->with($this->equalTo($this->encryptionProfile))
-      ->will($this->returnValue($this->encryptionMethod));
-
-    $encrypt_service->expects($this->any())
-      ->method('loadEncryptionProfileKey')
-      ->with($this->equalTo($this->encryptionProfile))
-      ->will($this->returnValue($this->encryptionMethod));
-
-    $encrypted_text = $encrypt_service->encrypt("text_to_encrypt", "test_encryption_profile");
-    $this->assertEquals("encrypted_text", $encrypted_text);
-  }
-
-  /**
-   * Tests the encrypt method throwing an exception.
-   *
-   * @covers ::__construct
-   * @covers ::encrypt
-   * @covers ::loadEncryptionProfile
-   * @covers ::loadEncryptionMethod
-   * @covers ::loadEncryptionProfileKey
-   *
-   * @@expectedException \Exception
-   */
-  public function testEncryptException() {
-    // Set up a mock for the EncryptService class to mock some methods.
-    $encrypt_service = $this->getMockBuilder('\Drupal\encrypt\EncryptService')
-      ->setMethods([
-        'loadEncryptionProfile',
-        'loadEncryptionMethod',
-        'loadEncryptionProfileKey',
-        'checkDependencies',
-      ])
-      ->setConstructorArgs(array(
-        $this->entityManager,
-        $this->encryptManager,
-        $this->keyRepository,
-      ))
-      ->getMock();
-
-    // Mock the methods on EncryptService that are out of scope for this test.
-    $this->encryptionProfile->expects($this->once())
+    $encrypt_service->expects($this->once())
       ->method('getEncryptionMethod')
-      ->will($this->returnValue("test_encryption_method"));
-    $this->encryptionProfile->expects($this->once())
-      ->method('getEncryptionKey')
-      ->will($this->returnValue("test_encryption_key"));
-
-    // Set up expectations for encryption method.
-    $this->encryptionMethod->expects($this->once())
-      ->method('checkDependencies')
-      ->will($this->returnValue(['Dependency error']));
-    $this->encryptionMethod->expects($this->never())
-      ->method('encrypt');
-
-    $encrypt_service->expects($this->any())
-      ->method('loadEncryptionProfile')
-      ->with($this->equalTo('test_encryption_profile'))
-      ->will($this->returnValue($this->encryptionProfile));
-
-    $encrypt_service->expects($this->any())
-      ->method('loadEncryptionMethod')
-      ->with($this->equalTo($this->encryptionProfile))
       ->will($this->returnValue($this->encryptionMethod));
 
-    $encrypt_service->expects($this->any())
-      ->method('loadEncryptionProfileKey')
-      ->with($this->equalTo($this->encryptionProfile))
-      ->will($this->returnValue($this->encryptionMethod));
-
-    $encrypt_service->encrypt("text_to_encrypt", "test_encryption_profile");
+    $encrypted_text = $encrypt_service->encrypt("text_to_encrypt", $this->encryptionProfile);
+    $this->assertEquals("encrypted_text", $encrypted_text);
   }
 
   /**
@@ -281,119 +144,118 @@ class EncryptServiceTest extends UnitTestCase {
    *
    * @covers ::__construct
    * @covers ::decrypt
-   * @covers ::loadEncryptionProfile
-   * @covers ::loadEncryptionMethod
-   * @covers ::loadEncryptionProfileKey
    */
   public function testDecrypt() {
     // Set up a mock for the EncryptService class to mock some methods.
     $encrypt_service = $this->getMockBuilder('\Drupal\encrypt\EncryptService')
       ->setMethods([
-        'loadEncryptionProfile',
-        'loadEncryptionMethod',
-        'loadEncryptionProfileKey',
-        'checkDependencies',
-      ])
+          'getEncryptionKeyValue',
+          'getEncryptionMethod',
+        ]
+      )
       ->setConstructorArgs(array(
-        $this->entityManager,
         $this->encryptManager,
         $this->keyRepository,
       ))
       ->getMock();
 
-    // Mock the methods on EncryptService that are out of scope for this test.
-    $this->encryptionProfile->expects($this->once())
-      ->method('getEncryptionMethod')
-      ->will($this->returnValue("test_encryption_method"));
-    $this->encryptionProfile->expects($this->once())
-      ->method('getEncryptionKey')
-      ->will($this->returnValue("test_encryption_key"));
-
     // Set up expectations for encryption method.
-    $this->encryptionMethod->expects($this->once())
-      ->method('checkDependencies')
-      ->will($this->returnValue(array()));
     $this->encryptionMethod->expects($this->once())
       ->method('decrypt')
       ->will($this->returnValue("decrypted_text"));
 
-    $encrypt_service->expects($this->any())
-      ->method('loadEncryptionProfile')
-      ->with($this->equalTo('test_encryption_profile'))
-      ->will($this->returnValue($this->encryptionProfile));
+    $encrypt_service->expects($this->once())
+      ->method('getEncryptionKeyValue')
+      ->will($this->returnValue('encryption_key'));
 
-    $encrypt_service->expects($this->any())
-      ->method('loadEncryptionMethod')
-      ->with($this->equalTo($this->encryptionProfile))
+    $encrypt_service->expects($this->once())
+      ->method('getEncryptionMethod')
       ->will($this->returnValue($this->encryptionMethod));
 
-    $encrypt_service->expects($this->any())
-      ->method('loadEncryptionProfileKey')
-      ->with($this->equalTo($this->encryptionProfile))
-      ->will($this->returnValue($this->encryptionMethod));
-
-    $decrypted_text = $encrypt_service->decrypt("text_to_decrypt", "test_encryption_profile");
-    $this->assertEquals("decrypted_text", $decrypted_text);
+    $encrypted_text = $encrypt_service->decrypt("text_to_encrypt", $this->encryptionProfile);
+    $this->assertEquals("decrypted_text", $encrypted_text);
   }
 
   /**
-   * Tests the decrypt method throwing an exception.
+   * Tests the getEncryptionKeyValue() method.
    *
-   * @covers ::__construct
-   * @covers ::decrypt
-   * @covers ::loadEncryptionProfile
-   * @covers ::loadEncryptionMethod
-   * @covers ::loadEncryptionProfileKey
+   * @covers ::getEncryptionKeyValue
    *
-   * @@expectedException \Exception
+   * @dataProvider encryptionKeyValueDataProvider
    */
-  public function testDecryptException() {
+  public function testGetEncryptionKeyValue($key, $valid_key) {
+    // Set up expectations for the encryption manager.
+    $this->encryptManager->expects($this->any())
+      ->method('createInstance')
+      ->with($this->equalTo('test_encryption_method'))
+      ->will($this->returnValue($this->encryptionMethod));
+
     // Set up a mock for the EncryptService class to mock some methods.
     $encrypt_service = $this->getMockBuilder('\Drupal\encrypt\EncryptService')
       ->setMethods([
-        'loadEncryptionProfile',
-        'loadEncryptionMethod',
-        'loadEncryptionProfileKey',
-        'checkDependencies',
-      ])
+          'getEncryptionMethod',
+          'loadEncryptionProfileKey',
+        ]
+      )
       ->setConstructorArgs(array(
-        $this->entityManager,
         $this->encryptManager,
         $this->keyRepository,
       ))
       ->getMock();
 
-    // Mock the methods on EncryptService that are out of scope for this test.
+    // Set up expectations for encryption method.
+    if ($valid_key) {
+      $this->encryptionMethod->expects($this->once())
+        ->method('encrypt')
+        ->will($this->returnValue("encrypted_text"));
+      $this->encryptionMethod->expects($this->once())
+        ->method('checkDependencies')
+        ->will($this->returnValue(array()));
+      $encrypt_service->expects($this->once())
+        ->method('getEncryptionMethod')
+        ->will($this->returnValue($this->encryptionMethod));
+    }
+    else {
+      $this->encryptionMethod->expects($this->never())
+        ->method('encrypt');
+      $this->encryptionMethod->expects($this->once())
+        ->method('checkDependencies')
+        ->will($this->returnValue(array("Dependency error")));
+      $this->setExpectedException('\Drupal\encrypt\Exception\EncryptException');
+      $encrypt_service->expects($this->never())
+        ->method('getEncryptionMethod');
+    }
+
+    // Set up expectation for handling of encryption profile by
+    // the getEncryptionKeyValue() method.
     $this->encryptionProfile->expects($this->once())
       ->method('getEncryptionMethod')
       ->will($this->returnValue("test_encryption_method"));
-    $this->encryptionProfile->expects($this->once())
-      ->method('getEncryptionKey')
-      ->will($this->returnValue("test_encryption_key"));
 
-    // Set up expectations for encryption method.
-    $this->encryptionMethod->expects($this->once())
-      ->method('checkDependencies')
-      ->will($this->returnValue(['Dependency error']));
-    $this->encryptionMethod->expects($this->never())
-      ->method('decrypt');
-
-    $encrypt_service->expects($this->any())
-      ->method('loadEncryptionProfile')
-      ->with($this->equalTo('test_encryption_profile'))
-      ->will($this->returnValue($this->encryptionProfile));
-
-    $encrypt_service->expects($this->any())
-      ->method('loadEncryptionMethod')
-      ->with($this->equalTo($this->encryptionProfile))
-      ->will($this->returnValue($this->encryptionMethod));
-
-    $encrypt_service->expects($this->any())
+    $encrypt_service->expects($this->once())
       ->method('loadEncryptionProfileKey')
-      ->with($this->equalTo($this->encryptionProfile))
-      ->will($this->returnValue($this->encryptionMethod));
+      ->with($this->encryptionProfile)
+      ->will($this->returnValue($key));
 
-    $encrypt_service->encrypt("text_to_decrypt", "test_encryption_profile");
+    // Call getEncryptionKeyValue() through the public encrypt() method.
+    $encrypted_text = $encrypt_service->encrypt("text_to_encrypt", $this->encryptionProfile);
+    if ($valid_key) {
+      $this->assertEquals("encrypted_text", $encrypted_text);
+    }
+
+  }
+
+  /**
+   * Data provider for testGetEncryptionKeyValue method.
+   *
+   * @return array
+   *   An array with data for the testGetEncryptionKeyValue method.
+   */
+  public function encryptionKeyValueDataProvider() {
+    return [
+      'normal' => ["mustbesixteenbit", TRUE],
+      'exception' => ["invalidkey", FALSE],
+    ];
   }
 
 }
