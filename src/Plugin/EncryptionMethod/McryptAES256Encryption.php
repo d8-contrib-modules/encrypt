@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\encrypt\Plugin\EncryptionMethod\McryptAES256Encryption.
+ */
+
 namespace Drupal\encrypt\Plugin\EncryptionMethod;
 
 use Drupal\encrypt\EncryptionMethodInterface;
@@ -12,13 +17,14 @@ use Drupal\Core\Plugin\PluginBase;
  * @EncryptionMethod(
  *   id = "mcrypt_aes_256",
  *   title = @Translation("Mcrypt AES 256"),
- *   description = "This uses PHPs mcrypt extension and <a href='http://en.wikipedia.org/wiki/Advanced_Encryption_Standard'>AES-256</a>."
+ *   description = "This uses PHPs mcrypt extension and <a href='http://en.wikipedia.org/wiki/Advanced_Encryption_Standard'>AES-256</a>.",
+ *   key_types = {"aes_encryption"}
  * )
  */
 class McryptAES256Encryption extends PluginBase implements EncryptionMethodInterface {
 
   /**
-   * @return mixed
+   * {@inheritdoc}
    */
   public function checkDependencies($text = NULL, $key = NULL) {
     $errors = array();
@@ -35,7 +41,7 @@ class McryptAES256Encryption extends PluginBase implements EncryptionMethodInter
   }
 
   /**
-   * @return mixed
+   * {@inheritdoc}
    */
   public function encrypt($text, $key, $options = array()) {
     $processed_text = '';
@@ -59,7 +65,7 @@ class McryptAES256Encryption extends PluginBase implements EncryptionMethodInter
   }
 
   /**
-   * @return mixed
+   * {@inheritdoc}
    */
   public function decrypt($text, $key, $options = array()) {
     $processed_text = '';
@@ -80,4 +86,5 @@ class McryptAES256Encryption extends PluginBase implements EncryptionMethodInter
     // Decrypt text.
     return trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $key, $text, MCRYPT_MODE_ECB, $iv));
   }
+
 }

@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\encrypt_seclib\Plugin\EncryptionMethod\PHPSecLibEncryption.
+ */
+
 namespace Drupal\encrypt_seclib\Plugin\EncryptionMethod;
 
 use Drupal\encrypt\EncryptionMethodInterface;
@@ -13,13 +18,14 @@ use phpseclib\Crypt\AES;
  * @EncryptionMethod(
  *   id = "phpseclib",
  *   title = @Translation("PHP Secure Communications Library (phpseclib)"),
- *   description = "Uses the <a href='http://phpseclib.sourceforge.net/'>phpseclib</a> library. This method is only preferable if you cannot install mcrypt."
+ *   description = "Uses the <a href='http://phpseclib.sourceforge.net/'>phpseclib</a> library. This method is only preferable if you cannot install mcrypt.",
+ *   key_types = {"aes_encryption"}
  * )
  */
 class PHPSecLibEncryption extends PluginBase implements EncryptionMethodInterface {
 
   /**
-   * @return mixed
+   * {@inheritdoc}
    */
   public function encrypt($text, $key, $options = array()) {
     $processed_text = '';
@@ -40,7 +46,7 @@ class PHPSecLibEncryption extends PluginBase implements EncryptionMethodInterfac
   }
 
   /**
-   * @return mixed
+   * {@inheritdoc}
    */
   public function decrypt($text, $key, $options = array()) {
     $processed_text = '';
@@ -60,7 +66,7 @@ class PHPSecLibEncryption extends PluginBase implements EncryptionMethodInterfac
   }
 
   /**
-   * @return mixed
+   * {@inheritdoc}
    */
   public function checkDependencies($text = NULL, $key = NULL) {
     $errors = [];
@@ -70,4 +76,5 @@ class PHPSecLibEncryption extends PluginBase implements EncryptionMethodInterfac
     }
     return $errors;
   }
+
 }
