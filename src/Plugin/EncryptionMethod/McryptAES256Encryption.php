@@ -11,7 +11,8 @@ use Drupal\encrypt\EncryptionMethodInterface;
 use Drupal\Core\Plugin\PluginBase;
 
 /**
- * Class McryptAES256Encryption
+ * Class McryptAES256Encryption.
+ *
  * @package Drupal\encrypt\Plugin\EncryptionMethod
  *
  * @EncryptionMethod(
@@ -56,7 +57,7 @@ class McryptAES256Encryption extends PluginBase implements EncryptionMethodInter
 
     $processed_text = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $key, $text, MCRYPT_MODE_ECB, $iv);
 
-    // Check if we are disabling base64 encoding
+    // Check if we are disabling base64 encoding.
     if (!$disable_base64) {
       $processed_text = base64_encode($processed_text);
     }
@@ -78,7 +79,7 @@ class McryptAES256Encryption extends PluginBase implements EncryptionMethodInter
     $iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
     $disable_base64 = array_key_exists('base64', $options) && $options['base64'] == FALSE;
 
-    // Check if we are disabling base64 encoding
+    // Check if we are disabling base64 encoding.
     if (!$disable_base64) {
       $text = base64_decode($text);
     }

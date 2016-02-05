@@ -54,4 +54,5 @@ class EncryptionMethod extends Plugin {
    * module.
    */
   public $key_types = [];
+
 }

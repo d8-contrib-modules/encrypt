@@ -12,7 +12,8 @@ use Drupal\Core\Plugin\PluginBase;
 use phpseclib\Crypt\AES;
 
 /**
- * Class PHPSecLibEncryption
+ * Class PHPSecLibEncryption.
+ *
  * @package Drupal\encrypt_seclib\Plugin\EncryptionMethod
  *
  * @EncryptionMethod(
@@ -35,7 +36,6 @@ class PHPSecLibEncryption extends PluginBase implements EncryptionMethodInterfac
     $aes = new AES();
     $aes->setKey($key);
     $processed_text = $aes->encrypt($text);
-
 
     // If base64 encoding is not disabled.
     if (!$disable_base64) {

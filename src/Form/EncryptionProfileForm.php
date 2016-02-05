@@ -21,16 +21,18 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class EncryptionProfileForm extends EntityForm {
 
   /**
+   * A configuration factory.
+   *
    * @var \Drupal\Core\Config\ConfigFactory
    */
-  protected $config_factory;
+  protected $configFactory;
 
   /**
    * EncryptService definition.
    *
    * @var \Drupal\encrypt\EncryptService
    */
-  protected $encrypt_service;
+  protected $encryptService;
 
   /**
    * Constructs a EncryptionProfileForm object.
@@ -41,8 +43,8 @@ class EncryptionProfileForm extends EntityForm {
    *   The encrypt service.
    */
   public function __construct(ConfigFactoryInterface $config_factory, EncryptService $encrypt_service) {
-    $this->config_factory = $config_factory;
-    $this->encrypt_service = $encrypt_service;
+    $this->configFactory = $config_factory;
+    $this->encryptService = $encrypt_service;
   }
 
   /**
@@ -61,7 +63,7 @@ class EncryptionProfileForm extends EntityForm {
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
 
-    /** @var $encryption_profile \Drupal\encrypt\Entity\EncryptionProfile */
+    /* @var $encryption_profile \Drupal\encrypt\Entity\EncryptionProfile */
     $encryption_profile = $this->entity;
     $form['label'] = array(
       '#type' => 'textfield',
@@ -88,7 +90,7 @@ class EncryptionProfileForm extends EntityForm {
       '#suffix' => '</div>',
     );
 
-    $encryption_methods = $this->encrypt_service->loadEncryptionMethods();
+    $encryption_methods = $this->encryptService->loadEncryptionMethods();
     $method_options = [];
     $key_types = [];
     foreach ($encryption_methods as $plugin_id => $definition) {
@@ -129,7 +131,9 @@ class EncryptionProfileForm extends EntityForm {
    * AJAX callback to update the dynamic settings on the form.
    *
    * @param array $form
+   *   The form array.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The FormState object.
    *
    * @return array
    *   The element to update in the form.
