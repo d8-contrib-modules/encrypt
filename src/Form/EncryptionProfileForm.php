@@ -12,6 +12,7 @@ use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\encrypt\EncryptService;
 use Drupal\key\KeyRepository;
+use Drupal\key\Plugin\KeyPluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -24,21 +25,28 @@ class EncryptionProfileForm extends EntityForm {
   /**
    * @var \Drupal\Core\Config\ConfigFactory
    */
-  protected $config_factory;
+  protected $configFactory;
 
   /**
-   * KeyRepository definition.
+   * The available keys.
    *
-   * @var \Drupal\key\KeyRepository
+   * @var \Drupal\key\KeyInterface[]
    */
-  protected $key_repository;
+  protected $keys;
 
   /**
-   * EncryptService definition.
+   * The available encryption methods.
    *
-   * @var \Drupal\encrypt\EncryptService
+   * @var \Drupal\encrypt\EncryptionMethodInterface[]
    */
-  protected $encrypt_service;
+  protected $encryptionMethods;
+
+  /**
+   * The Key plugin manager service.
+   *
+   * @var \Drupal\key\Plugin\KeyPluginManager
+   */
+  protected $keyManager;
 
   /**
    * Constructs a EncryptionProfileForm object.
@@ -48,12 +56,15 @@ class EncryptionProfileForm extends EntityForm {
    * @param \Drupal\Key\KeyRepository $key_repository
    *   The ConditionManager for building the visibility UI.
    * @param \Drupal\Encrypt\EncryptService $encrypt_service
-   *   The lazy context repository service.
+   *   The encrypt service.
+   * @param \Drupal\key\Plugin\KeyPluginManager $key_manager
+   *   The key manager service.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, KeyRepository $key_repository, EncryptService $encrypt_service) {
-    $this->config_factory = $config_factory;
-    $this->key_repository = $key_repository;
-    $this->encrypt_service = $encrypt_service;
+  public function __construct(ConfigFactoryInterface $config_factory, KeyRepository $key_repository, EncryptService $encrypt_service, KeyPluginManager $key_manager) {
+    $this->configFactory = $config_factory;
+    $this->keys = $key_repository->getKeys();
+    $this->encryptionMethods = $encrypt_service->loadEncryptionMethods();
+    $this->keyManager = $key_manager;
   }
 
   /**
@@ -63,7 +74,8 @@ class EncryptionProfileForm extends EntityForm {
     return new static(
       $container->get('config.factory'),
       $container->get('key.repository'),
-      $container->get('encryption')
+      $container->get('encryption'),
+      $container->get('plugin.manager.key.key_type')
     );
   }
 
@@ -73,9 +85,7 @@ class EncryptionProfileForm extends EntityForm {
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
 
-    $keys = $this->key_repository->getKeys();
-
-    if (empty($keys)) {
+    if (empty($this->keys)) {
       drupal_set_message('No system keys (admin/config/system/key) are installed to manage encryption profiles.');
     }
 
@@ -99,39 +109,111 @@ class EncryptionProfileForm extends EntityForm {
       '#disabled' => !$encryption_profile->isNew(),
     );
 
-    /** @var $key \Drupal\key\Entity\KeyInterface */
-    foreach ($keys as $key) {
-      $key_id = $key->id();
-      $key_title = $key->label();
-      $keys[$key_id] = (string) $key_title;
+    // This is the element that contains all of the dynamic parts of the form.
+    $form['encryption'] = array(
+      '#type' => 'container',
+      '#prefix' => '<div id="encrypt-settings">',
+      '#suffix' => '</div>',
+    );
+
+    $encryption_methods = [];
+    foreach ($this->encryptionMethods as $plugin_id => $definition) {
+      $encryption_methods[$plugin_id] = (string) $definition['title'];
     }
 
+    $current_encryption_method = $encryption_profile->getEncryptionMethod();
+    if (!$current_encryption_method && !empty($encryption_methods)) {
+      // Get the first one from the list.
+      $current_encryption_method = array_shift(array_keys($encryption_methods));
+    }
+
+    $form['encryption']['encryption_method'] = array(
+      '#type' => 'select',
+      '#title' => $this->t('Encryption Method'),
+      '#description' => $this->t('Select the method used for encryption'),
+      '#options' => $encryption_methods,
+      '#default_value' => $current_encryption_method,
+      '#ajax' => array(
+        'callback' => [$this, 'ajaxUpdateSettings'],
+        'event' => 'change',
+        'wrapper' => 'encrypt-settings',
+      ),
+    );
+
+    $keys = $this->getAllowedKeys($current_encryption_method);
     if ($profile_key = $encryption_profile->getEncryptionKey()) {
       $default_key = $profile_key;
     }
 
-    $form['encryption_key'] = array(
+    $form['encryption']['encryption_key'] = array(
       '#type' => 'select',
       '#title' => $this->t('Encryption Key'),
-      '#description' => $this->t('Select the key used for encryption.'),
+      '#description' => $this->t('Select the key used for encryption. Only key types that are allowed for the selected encryption method are listed here.'),
       '#options' => $keys,
-      '#default_value' => (empty($default_key)?NULL:$default_key),
-      '#required' => TRUE
-    );
-
-    $enc_methods = [];
-    foreach ($this->encrypt_service->loadEncryptionMethods() as $plugin_id => $definition) {
-      $enc_methods[$plugin_id] = (string) $definition['title'];
-    }
-    $form['encryption_method'] = array(
-      '#type' => 'select',
-      '#title' => $this->t('Encryption Method'),
-      '#description' => $this->t('Select the method used for encryption'),
-      '#options' => $enc_methods,
-      '#default_value' => $encryption_profile->getEncryptionMethod(),
+      '#default_value' => empty($default_key) ? NULL : $default_key,
+      '#required' => TRUE,
     );
 
     return $form;
+  }
+
+  /**
+   * Get a list of allowed keys for the given encryption method.
+   *
+   * @param string $encryption_method
+   *   The selected encryption method.
+   * @return array
+   *   A list of allowed keys.
+   */
+  protected function getAllowedKeys($encryption_method) {
+    $allowed_keys = [];
+    $encryption_method_definition = $this->encryptionMethods[$encryption_method];
+
+    /** @var $key \Drupal\key\KeyInterface */
+    foreach ($this->keys as $key) {
+      $key_type = $key->getKeyType();
+      $key_type_definition = $this->keyManager->getDefinition($key_type->getPluginId());
+
+      // Don't allow keys with key types other than encryption.
+      if ($key_type_definition['group'] != "encryption") {
+        continue;
+      }
+
+      // Don't allow keys with incorrect sizes.
+      $allowed_key_sizes = $encryption_method_definition['key_sizes'];
+      $key_type_config = $key_type->getConfiguration();
+
+      if (!isset($key_type_config['key_size']) || !in_array($key_type_config['key_size'], $allowed_key_sizes)) {
+        continue;
+      }
+      // Don't allow keys with incorrect key_type, if defined in the encryption
+      // method definition.
+      if (isset($encryption_method_definition['key_type'])) {
+        if ($encryption_method_definition['key_type'] != $key_type->getPluginId()) {
+          continue;
+        }
+      }
+
+      $key_id = $key->id();
+      $key_title = $key->label();
+      $allowed_keys[$key_id] = (string) $key_title;
+    }
+    return $allowed_keys;
+  }
+
+  /**
+   * AJAX callback to update the dynamic settings on the form.
+   *
+   * @param array $form
+   *   The form array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The FormState object.
+   *
+   * @return array
+   *   The element to update in the form.
+   */
+  public function ajaxUpdateSettings(array &$form, FormStateInterface $form_state) {
+    return $form['encryption'];
   }
 
   /**
