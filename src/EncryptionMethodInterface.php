@@ -1,27 +1,43 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\encrypt\EncryptionMethodInterface.
+ */
+
 namespace Drupal\encrypt;
 
 use Drupal\Component\Plugin\PluginInspectionInterface;
 
 /**
- * Interface EncryptionMethodInterface
+ * Interface EncryptionMethodInterface.
+ *
  * @package Drupal\encrypt
  */
 interface EncryptionMethodInterface extends PluginInspectionInterface {
 
-    /**
-     * @return mixed
-     */
-    public function encrypt($text, $key);
+  /**
+   * Encrypt text with the given key.
+   *
+   * @return mixed
+   *   The encrypted text.
+   */
+  public function encrypt($text, $key);
 
-    /**
-     * @return mixed
-     */
-    public function decrypt($text, $key);
+  /**
+   * Decrypt text with the given key.
+   *
+   * @return mixed
+   *   The decrypted text.
+   */
+  public function decrypt($text, $key);
 
-    /**
-     * @return mixed
-     */
-    public function checkDependencies($text = NULL, $key = NULL);
+  /**
+   * Enforce dependencies for this encryption method.
+   *
+   * @return array
+   *   An array of error messages.
+   */
+  public function checkDependencies($text = NULL, $key = NULL);
+
 }

@@ -1,24 +1,31 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\encrypt\Plugin\EncryptionMethod\McryptAES256Encryption.
+ */
+
 namespace Drupal\encrypt\Plugin\EncryptionMethod;
 
 use Drupal\encrypt\EncryptionMethodInterface;
 use Drupal\Core\Plugin\PluginBase;
 
 /**
- * Class McryptAES256Encryption
+ * Class McryptAES256Encryption.
+ *
  * @package Drupal\encrypt\Plugin\EncryptionMethod
  *
  * @EncryptionMethod(
  *   id = "mcrypt_aes_256",
  *   title = @Translation("Mcrypt AES 256"),
- *   description = "This uses PHPs mcrypt extension and <a href='http://en.wikipedia.org/wiki/Advanced_Encryption_Standard'>AES-256</a>."
+ *   description = "This uses PHPs mcrypt extension and <a href='http://en.wikipedia.org/wiki/Advanced_Encryption_Standard'>AES-256</a>.",
+ *   key_types = {"aes_encryption"}
  * )
  */
 class McryptAES256Encryption extends PluginBase implements EncryptionMethodInterface {
 
   /**
-   * @return mixed
+   * {@inheritdoc}
    */
   public function checkDependencies($text = NULL, $key = NULL) {
     $errors = array();
@@ -35,7 +42,7 @@ class McryptAES256Encryption extends PluginBase implements EncryptionMethodInter
   }
 
   /**
-   * @return mixed
+   * {@inheritdoc}
    */
   public function encrypt($text, $key, $options = array()) {
     $processed_text = '';
@@ -50,7 +57,7 @@ class McryptAES256Encryption extends PluginBase implements EncryptionMethodInter
 
     $processed_text = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $key, $text, MCRYPT_MODE_ECB, $iv);
 
-    // Check if we are disabling base64 encoding
+    // Check if we are disabling base64 encoding.
     if (!$disable_base64) {
       $processed_text = base64_encode($processed_text);
     }
@@ -59,7 +66,7 @@ class McryptAES256Encryption extends PluginBase implements EncryptionMethodInter
   }
 
   /**
-   * @return mixed
+   * {@inheritdoc}
    */
   public function decrypt($text, $key, $options = array()) {
     $processed_text = '';
@@ -72,7 +79,7 @@ class McryptAES256Encryption extends PluginBase implements EncryptionMethodInter
     $iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
     $disable_base64 = array_key_exists('base64', $options) && $options['base64'] == FALSE;
 
-    // Check if we are disabling base64 encoding
+    // Check if we are disabling base64 encoding.
     if (!$disable_base64) {
       $text = base64_decode($text);
     }
@@ -80,4 +87,5 @@ class McryptAES256Encryption extends PluginBase implements EncryptionMethodInter
     // Decrypt text.
     return trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $key, $text, MCRYPT_MODE_ECB, $iv));
   }
+
 }
