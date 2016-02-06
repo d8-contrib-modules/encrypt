@@ -7,9 +7,9 @@
 
 namespace Drupal\encrypt;
 
-use Behat\Mink\Exception\Exception;
-use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\key\KeyRepository;
+use Drupal\encrypt\Entity\EncryptionProfile;
+use Drupal\encrypt\Exception\EncryptException;
 
 /**
  * Class EncryptService.
@@ -19,30 +19,38 @@ use Drupal\key\KeyRepository;
 class EncryptService implements EncryptServiceInterface {
 
   /**
-   * @var \Drupal\Core\Entity\EntityManagerInterface
-   */
-  protected $entityManager;
-
-  /**
+   * The EncryptionMethod plugin manager.
+   *
    * @var \Drupal\encrypt\EncryptionMethodManager
    */
   protected $encryptManager;
 
   /**
+   * The KeyRepository.
+   *
    * @var \Drupal\key\KeyRepository
    */
-  protected $key;
+  protected $keyRepository;
+
+  /**
+   * The encryption method to use.
+   *
+   * @var \Drupal\encrypt\EncryptionMethodInterface
+   */
+  protected $encryptionMethod;
 
 
   /**
-   * @param \Drupal\Core\Entity\EntityManagerInterface $entityManager
-   * @param \Drupal\encrypt\EncryptionMethodManager $manager
-   * @param \Drupal\key\KeyRepository $key
+   * {@inheritdoc}
+   *
+   * @param \Drupal\encrypt\EncryptionMethodManager $encrypt_manager
+   *   The EncryptionMethod plugin manager.
+   * @param \Drupal\key\KeyRepository $key_repository
+   *   The KeyRepository.
    */
-  public function __construct(EntityManagerInterface $entityManager, EncryptionMethodManager $encryptManager, KeyRepository $key) {
-    $this->entityManager = $entityManager;
-    $this->encryptManager = $encryptManager;
-    $this->key = $key;
+  public function __construct(EncryptionMethodManager $encrypt_manager, KeyRepository $key_repository) {
+    $this->encryptManager = $encrypt_manager;
+    $this->keyRepository = $key_repository;
   }
 
   /**
@@ -52,89 +60,84 @@ class EncryptService implements EncryptServiceInterface {
     return $this->encryptManager->getDefinitions();
   }
 
-
   /**
-   * {@inheritdoc}.
+   * {@inheritdoc}
    */
-  public function encrypt($text, $inst_id) {
-
-    // Load the profile.
-    $enc_profile = $this->loadEncryptionProfile($inst_id);
-
-    // Load the method.
-    $enc_method = $this->loadEncryptionMethod($enc_profile);
-
-    // Load the key.
-    $key_value = $this->loadEncryptionProfileKey($enc_profile);
-
-    // Check for missing dependencies.
-    $errors = $enc_method->checkDependencies($text, $key_value);
-    if (empty($errors)) {
-      // Return the encrypted string.
-      return $enc_method->encrypt($text, $key_value);
-    } else {
-      // Throw an exception with the errors noted
-      throw new \Exception(implode('; ', $errors));
-    }
-
+  public function encrypt($text, EncryptionProfile $encryption_profile) {
+    // Get the key and check dependencies.
+    $key_value = $this->getEncryptionKeyValue($text, $encryption_profile);
+    // Return the encrypted value.
+    return $this->getEncryptionMethod()->encrypt($text, $key_value);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function decrypt($text, $inst_id) {
+  public function decrypt($text, EncryptionProfile $encryption_profile) {
+    // Get the key and check dependencies.
+    $key_value = $this->getEncryptionKeyValue($text, $encryption_profile);
+    // Return the encrypted value.
+    return $this->getEncryptionMethod()->decrypt($text, $key_value);
+  }
 
-    // Load the profile.
-    $enc_profile = $this->loadEncryptionProfile($inst_id);
+  /**
+   * Get the used encryption method.
+   *
+   * @return \Drupal\encrypt\EncryptionMethodInterface
+   *   The used encryption method.
+   *
+   * @codeCoverageIgnore
+   */
+  protected function getEncryptionMethod() {
+    return $this->encryptionMethod;
+  }
 
-    // Load the method.
-    $enc_method = $this->loadEncryptionMethod($enc_profile);
+  /**
+   * Get the used encryption key.
+   *
+   * @param string $text
+   *   The text to encrypt / decrypt.
+   * @param \Drupal\encrypt\Entity\EncryptionProfile $encryption_profile
+   *   The encryption profile to use.
+   *
+   * @return string
+   *   The encryption key value.
+   *
+   * @throws \Drupal\encrypt\Exception\EncryptException
+   *   Can throw an EncryptException.
+   */
+  protected function getEncryptionKeyValue($text, EncryptionProfile $encryption_profile) {
+    // Load the encryption method.
+    $enc_method = $encryption_profile->getEncryptionMethod();
+    $this->encryptionMethod = $this->encryptManager->createInstance($enc_method);
 
-    // Load the key.
-    $key_value = $this->loadEncryptionProfileKey($enc_profile);
+    // Load the encryption key.
+    $key_value = $this->loadEncryptionProfileKey($encryption_profile);
 
     // Check for missing dependencies.
-    $errors = $enc_method->checkDependencies($text, $key_value);
-    if (empty($errors)) {
-      // Return the encrypted string.
-      return $enc_method->decrypt($text, $key_value);
-    } else {
-      // Throw an exception with the errors noted
-      throw new \Exception(implode('; ', $errors));
+    $errors = $this->encryptionMethod->checkDependencies($text, $key_value);
+
+    if (!empty($errors)) {
+      // Throw an exception with the errors from the encryption method.
+      throw new EncryptException(implode('; ', $errors));
     }
-  }
-
-  /**
-   * Loads an encryption profile instance.
-   * @param string $inst_id
-   */
-  private function loadEncryptionProfile($inst_id) {
-    /** @var $enc_profile \Drupal\encrypt\Entity\EncryptionProfile */
-    if (!$enc_profile = $this->entityManager->getStorage('encryption_profile')
-        ->load($inst_id)) {
-      throw new \Exception('Encryption profile was not found.');
+    else {
+      return $key_value;
     }
-
-    return $enc_profile;
-  }
-
-  /**
-   * Loads an encryption profile method.
-   * @param \Drupal\encrypt\Entity\EncryptionProfile $enc_profile
-   */
-  private function loadEncryptionMethod($enc_profile) {
-    // Load the encryption method.
-    $enc_method = $enc_profile->getEncryptionMethod();
-    return $this->encryptManager->createInstance($enc_method);
   }
 
   /**
    * Loads an encryption profile key.
-   * @param \Drupal\encrypt\Entity\EncryptionProfile $enc_profile
+   *
+   * @param \Drupal\encrypt\Entity\EncryptionProfile $encryption_profile
+   *   The encryption profile to use.
+   *
+   * @return string
+   *   The encryption key value.
    */
-  private function loadEncryptionProfileKey($enc_profile) {
-    // Load the key.
-    $key_id = $enc_profile->getEncryptionKey();
-    return $this->key->getKey($key_id)->getKeyValue();
+  protected function loadEncryptionProfileKey(EncryptionProfile $encryption_profile) {
+    $key_id = $encryption_profile->getEncryptionKey();
+    return $this->keyRepository->getKey($key_id)->getKeyValue();
   }
+
 }

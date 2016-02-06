@@ -20,12 +20,10 @@ It requires a key, which is provided by the Key module. To manage keys, visit `a
 After configuring the service, the service provides the ability to encrypt and decrypt using your encryption profile (machine name).
 
 ### Encrypt
-
+`$encryption_profile = \Drupal::service('entity.manager')->getStorage('encryption_profile')->load($instance_id);`
 `Drupal::service('encryption')->encrypt($string, $encryption_profile);`
 
 
 ### Decrypt
-
+`$encryption_profile = \Drupal::service('entity.manager')->getStorage('encryption_profile')->load($instance_id);`
 `Drupal::service('encryption')->decrypt($string, $encryption_profile);`
-
-

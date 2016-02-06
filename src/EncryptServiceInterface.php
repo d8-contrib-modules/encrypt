@@ -1,10 +1,12 @@
 <?php
 /**
  * @file
- * Contains \Drupal\encrypt\EncryptServiceInterface.php
+ * Contains \Drupal\encrypt\EncryptServiceInterface.php.
  */
+
 namespace Drupal\encrypt;
 
+use Drupal\encrypt\Entity\EncryptionProfile;
 
 /**
  * Class EncryptService.
@@ -12,39 +14,45 @@ namespace Drupal\encrypt;
  * @package Drupal\encrypt
  */
 interface EncryptServiceInterface {
+
   /**
    * Returns the registered encryption method plugins.
    *
    * @return array
    *   List of encryption methods.
    */
-  function loadEncryptionMethods();
+  public function loadEncryptionMethods();
 
   /**
    * Main encrypt function.
    *
    * @param string $text
-   *  The plain text to encrypt.
+   *   The plain text to encrypt.
+   * @param \Drupal\encrypt\Entity\EncryptionProfile $encryption_profile
+   *   The encryption profile entity.
    *
-   * @param string $instance_id
-   *  The encryption profile ID linked to Drupal\encrypt\Entity\EncryptionProfile.
+   * @return string
+   *   The encrypted string.
    *
-   * return string
-   *  The encrypted string.
+   * @throws \Drupal\encrypt\Exception\EncryptException
+   *   Can throw an EncryptException.
    */
-  function encrypt($text, $instance_id);
+  public function encrypt($text, EncryptionProfile $encryption_profile);
 
   /**
    * Main decrypt function.
    *
    * @param string $text
-   *  The encrypted text to decrypt.
+   *   The encrypted text to decrypt.
+   * @param \Drupal\encrypt\Entity\EncryptionProfile $encryption_profile
+   *   The encryption profile entity.
    *
-   * @param string $instance_id
-   *  The encryption profile ID linked to Drupal\encrypt\Entity\EncryptionProfile.
+   * @return string
+   *   The decrypted plain string.
    *
-   * return string
-   *  The decrypted plain string.
+   * @throws \Drupal\encrypt\Exception\EncryptException
+   *   Can throw an EncryptException.
    */
-  function decrypt($text, $instance_id);
+  public function decrypt($text, EncryptionProfile $encryption_profile);
+
 }
