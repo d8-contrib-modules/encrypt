@@ -59,7 +59,8 @@ class EncryptionMethod extends Plugin {
   /**
    * The key sizes allowed to be used with this encryption method.
    *
-   * Example values: "128_bits", "192_bits", "256_bits"
+   * Values can be numeric value, or a range.
+   * Examples: {"128", "192", "256"} or {"32-448"}
    *
    * @see \Drupal\key\KeyProvider\AesEncryptionKeyType
    *
