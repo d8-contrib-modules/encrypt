@@ -27,4 +27,12 @@ interface EncryptionProfileInterface extends ConfigEntityInterface {
    */
   public function getEncryptionKey();
 
+  /**
+   * Validate the EncryptionProfile entity.
+   *
+   * @return array
+   *   An array of validation errors. Empty if no errors.
+   */
+  public function validate();
+
 }

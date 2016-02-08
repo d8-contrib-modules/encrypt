@@ -12,7 +12,6 @@ use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\encrypt\EncryptService;
 use Drupal\key\KeyRepository;
-use Drupal\key\Plugin\KeyPluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -42,13 +41,6 @@ class EncryptionProfileForm extends EntityForm {
   protected $encryptionMethods;
 
   /**
-   * The Key plugin manager service.
-   *
-   * @var \Drupal\key\Plugin\KeyPluginManager
-   */
-  protected $keyManager;
-
-  /**
    * Constructs a EncryptionProfileForm object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -57,14 +49,11 @@ class EncryptionProfileForm extends EntityForm {
    *   The ConditionManager for building the visibility UI.
    * @param \Drupal\Encrypt\EncryptService $encrypt_service
    *   The encrypt service.
-   * @param \Drupal\key\Plugin\KeyPluginManager $key_manager
-   *   The key manager service.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, KeyRepository $key_repository, EncryptService $encrypt_service, KeyPluginManager $key_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, KeyRepository $key_repository, EncryptService $encrypt_service) {
     $this->configFactory = $config_factory;
     $this->keys = $key_repository->getKeys();
     $this->encryptionMethods = $encrypt_service->loadEncryptionMethods();
-    $this->keyManager = $key_manager;
   }
 
   /**
@@ -74,8 +63,7 @@ class EncryptionProfileForm extends EntityForm {
     return new static(
       $container->get('config.factory'),
       $container->get('key.repository'),
-      $container->get('encryption'),
-      $container->get('plugin.manager.key.key_type')
+      $container->get('encryption')
     );
   }
 
@@ -140,7 +128,7 @@ class EncryptionProfileForm extends EntityForm {
       ),
     );
 
-    $keys = $this->getAllowedKeys($current_encryption_method);
+    $keys = $encryption_profile->getAllowedKeys($current_encryption_method);
     if ($profile_key = $encryption_profile->getEncryptionKey()) {
       $default_key = $profile_key;
     }
@@ -158,87 +146,18 @@ class EncryptionProfileForm extends EntityForm {
   }
 
   /**
-   * Get a list of allowed keys for the given encryption method.
-   *
-   * @param string $encryption_method
-   *   The selected encryption method.
-   * @return array
-   *   A list of allowed keys.
+   * {@inheritdoc}
    */
-  protected function getAllowedKeys($encryption_method) {
-    $allowed_keys = [];
-    $encryption_method_definition = $this->encryptionMethods[$encryption_method];
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    parent::validateForm($form, $form_state);
+    $form_state->cleanValues();
+    /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+    $this->entity = $this->buildEntity($form, $form_state);
 
-    /** @var $key \Drupal\key\KeyInterface */
-    foreach ($this->keys as $key) {
-      $key_type = $key->getKeyType();
-      $key_type_definition = $this->keyManager->getDefinition($key_type->getPluginId());
-
-      // @TODO: remove this check and only get Keys of type EncryptionKeyType or child classes.
-      // This still needs to be implemented in Key module first.
-      // Don't allow keys with key types other than encryption.
-      if ($key_type_definition['group'] != "encryption") {
-        continue;
-      }
-
-      // Don't allow keys with incorrect sizes.
-      if (isset($encryption_method_definition['key_size'])) {
-        $allowed_key_sizes = $encryption_method_definition['key_size'];
-        $key_type_config = $key_type->getConfiguration();
-        if (!isset($key_type_config['key_size']) || !$this->validKeySize($key_type_config['key_size'], $allowed_key_sizes)) {
-          continue;
-        }
-      }
-
-      // Don't allow keys with incorrect key_type, if defined in the encryption
-      // method definition.
-      if (isset($encryption_method_definition['key_type']) && !empty($encryption_method_definition['key_type'])) {
-        if (!in_array($key_type->getPluginId(), $encryption_method_definition['key_type'])) {
-          continue;
-        }
-      }
-
-      $key_id = $key->id();
-      $key_title = $key->label();
-      $allowed_keys[$key_id] = (string) $key_title;
+    $errors = $this->entity->validate();
+    if ($errors) {
+      $form_state->setErrorByName('encryption_key', implode(';', $errors));
     }
-    return $allowed_keys;
-  }
-
-  /**
-   * Validates if key size matches the allowed values of the encryption method.
-   *
-   * @param mixed $key_size
-   *   The key size as defined by the Key type.
-   * @param array $allowed_key_sizes
-   *   The allowed key sizes as defined by the encryption method.
-   * @return bool
-   *   Whether or not the key size is valid.
-   */
-  protected function validKeySize($key_size, array $allowed_key_sizes) {
-    $valid = FALSE;
-    // Make sure we're dealing with an integer.
-    // Strips out optional "_bits" suffix from Key module.
-    $key_size = (int) $key_size;
-
-    if (!empty($allowed_key_sizes)) {
-      foreach ($allowed_key_sizes as $allowed) {
-        // Check if allowed key size is a range or not.
-        if (strpos($allowed, '-') !== FALSE) {
-          list($min, $max) = explode('-', $allowed, 2);
-          if (($min <= $key_size) && ($key_size <= $max)) {
-            $valid = TRUE;
-          }
-        }
-        else {
-          if ($allowed == $key_size) {
-            $valid = TRUE;
-          }
-        }
-      }
-    }
-
-    return $valid;
   }
 
   /**
