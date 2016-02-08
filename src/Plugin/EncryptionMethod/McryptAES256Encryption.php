@@ -13,8 +13,8 @@ use Drupal\Core\Plugin\PluginBase;
  *   id = "mcrypt_aes_256",
  *   title = @Translation("Mcrypt AES 256"),
  *   description = "This uses PHPs mcrypt extension and <a href='http://en.wikipedia.org/wiki/Advanced_Encryption_Standard'>AES-256</a>.",
- *   key_type = "aes_encryption",
- *   key_sizes = {"256_bits"}
+ *   key_type = {"aes_encryption"},
+ *   key_size = {"128", "192", "256"}
  * )
  */
 class McryptAES256Encryption extends PluginBase implements EncryptionMethodInterface {

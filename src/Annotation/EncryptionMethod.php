@@ -44,7 +44,7 @@ class EncryptionMethod extends Plugin {
 
 
   /**
-   * The key type this encryption method should use.
+   * The key type(s) this encryption method should use.
    *
    * If none specified, all keys within the group "encryption" will be
    * available to this encryption method.
@@ -52,9 +52,9 @@ class EncryptionMethod extends Plugin {
    * This setting should refer to a valid Plugin ID of type KeyType.
    * For example "aes_encryption", provided by the Key module.
    *
-   * @var string
+   * @var array
    */
-  public $key_type = '';
+  public $key_type = [];
 
   /**
    * The key sizes allowed to be used with this encryption method.
@@ -65,6 +65,6 @@ class EncryptionMethod extends Plugin {
    *
    * @var array
    */
-  public $key_sizes = [];
+  public $key_size = [];
 
 }

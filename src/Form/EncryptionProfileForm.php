@@ -174,22 +174,26 @@ class EncryptionProfileForm extends EntityForm {
       $key_type = $key->getKeyType();
       $key_type_definition = $this->keyManager->getDefinition($key_type->getPluginId());
 
+      // @TODO: remove this check and only get Keys of type EncryptionKeyType or child classes.
+      // This still needs to be implemented in Key module first.
       // Don't allow keys with key types other than encryption.
       if ($key_type_definition['group'] != "encryption") {
         continue;
       }
 
       // Don't allow keys with incorrect sizes.
-      $allowed_key_sizes = $encryption_method_definition['key_sizes'];
-      $key_type_config = $key_type->getConfiguration();
-
-      if (!isset($key_type_config['key_size']) || !in_array($key_type_config['key_size'], $allowed_key_sizes)) {
-        continue;
+      if (isset($encryption_method_definition['key_size'])) {
+        $allowed_key_sizes = $encryption_method_definition['key_size'];
+        $key_type_config = $key_type->getConfiguration();
+        if (!isset($key_type_config['key_size']) || !$this->validKeySize($key_type_config['key_size'], $allowed_key_sizes)) {
+          continue;
+        }
       }
+
       // Don't allow keys with incorrect key_type, if defined in the encryption
       // method definition.
-      if (isset($encryption_method_definition['key_type'])) {
-        if ($encryption_method_definition['key_type'] != $key_type->getPluginId()) {
+      if (isset($encryption_method_definition['key_type']) && !empty($encryption_method_definition['key_type'])) {
+        if (!in_array($key_type->getPluginId(), $encryption_method_definition['key_type'])) {
           continue;
         }
       }
@@ -199,6 +203,42 @@ class EncryptionProfileForm extends EntityForm {
       $allowed_keys[$key_id] = (string) $key_title;
     }
     return $allowed_keys;
+  }
+
+  /**
+   * Validates if key size matches the allowed values of the encryption method.
+   *
+   * @param mixed $key_size
+   *   The key size as defined by the Key type.
+   * @param array $allowed_key_sizes
+   *   The allowed key sizes as defined by the encryption method.
+   * @return bool
+   *   Whether or not the key size is valid.
+   */
+  protected function validKeySize($key_size, array $allowed_key_sizes) {
+    $valid = FALSE;
+    // Make sure we're dealing with an integer.
+    // Strips out optional "_bits" suffix from Key module.
+    $key_size = (int) $key_size;
+
+    if (!empty($allowed_key_sizes)) {
+      foreach ($allowed_key_sizes as $allowed) {
+        // Check if allowed key size is a range or not.
+        if (strpos($allowed, '-') !== FALSE) {
+          list($min, $max) = explode('-', $allowed, 2);
+          if (($min <= $key_size) && ($key_size <= $max)) {
+            $valid = TRUE;
+          }
+        }
+        else {
+          if ($allowed == $key_size) {
+            $valid = TRUE;
+          }
+        }
+      }
+    }
+
+    return $valid;
   }
 
   /**

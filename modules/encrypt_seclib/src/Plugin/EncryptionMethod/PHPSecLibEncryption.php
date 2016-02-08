@@ -14,8 +14,8 @@ use phpseclib\Crypt\AES;
  *   id = "phpseclib",
  *   title = @Translation("PHP Secure Communications Library (phpseclib)"),
  *   description = "Uses the <a href='http://phpseclib.sourceforge.net/'>phpseclib</a> library. This method is only preferable if you cannot install mcrypt.",
- *   key_type = "aes_encryption",
- *   key_sizes = {"128_bits", "192_bits", "256_bits"}
+ *   key_type = {"aes_encryption"},
+ *   key_size = {"128", "192", "256"}
  * )
  */
 class PHPSecLibEncryption extends PluginBase implements EncryptionMethodInterface {
