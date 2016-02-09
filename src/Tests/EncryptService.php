@@ -37,8 +37,9 @@ class EncryptService extends WebTestBase {
     $edit = [
       'id' => 'testing_key',
       'label' => 'Testing Key',
+      'key_type' => 'authentication',
       'key_provider' => 'config',
-      'key_provider_settings[key_value]' => 'mustbesixteenbit',
+      'key_input_settings[key_value]' => 'mustbesixteenbit',
     ];
     $this->drupalPostForm(NULL, $edit, t('Save'));
 
