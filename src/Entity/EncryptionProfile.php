@@ -35,11 +35,11 @@ use Drupal\encrypt\Exception\KeyNotAllowedException;
  *     "uuid" = "uuid"
  *   },
  *   links = {
- *     "canonical" = "/admin/config/system/encryption/profile/{encryption_profile}",
- *     "add-form" = "/admin/config/system/encryption/profile/add",
- *     "edit-form" = "/admin/config/system/encryption/profile/{encryption_profile}/edit",
- *     "delete-form" = "/admin/config/system/encryption/profile/{encryption_profile}/delete",
- *     "collection" = "/admin/config/system/encryption/profile",
+ *     "canonical" = "/admin/config/system/encryption/profiles/{encryption_profile}",
+ *     "add-form" = "/admin/config/system/encryption/profiles/add",
+ *     "edit-form" = "/admin/config/system/encryption/profiles/manage/{encryption_profile}",
+ *     "delete-form" = "/admin/config/system/encryption/profiles/manage/{encryption_profile}/delete",
+ *     "collection" = "/admin/config/system/encryption/profiles"
  *   }
  * )
  */

@@ -1,7 +1,5 @@
-# Title menu items definition
 entity.encryption_profile.collection:
-  title: 'Encryption Profile'
+  title: 'Encryption profiles'
   route_name: entity.encryption_profile.collection
-  description: 'Encryption Profile listing'
+  description: 'Manage profiles that can be used to encrypt and decrypt data.'
   parent: system.admin_config_system
-
