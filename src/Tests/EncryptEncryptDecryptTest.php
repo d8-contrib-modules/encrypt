@@ -38,7 +38,7 @@ class EncryptEncryptDecryptTest extends \Drupal\simpletest\WebTestBase {
     $this->drupalPostForm(NULL, $edit, t('Save'));
 
     // Setup an initial encryption profile and default it.
-    $this->drupalGet('admin/config/system/encryption/profile/add');
+    $this->drupalGet('admin/config/system/encryption/profiles/add');
     $edit = [
       'id' => 'testing_profile',
       'label' => 'Testing profile',
