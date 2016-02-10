@@ -139,6 +139,27 @@ class EncryptionProfileForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    parent::validateForm($form, $form_state);
+
+    // Only validate when submitting the form, not on AJAX rebuild.
+    if (!$form_state->isSubmitted()) {
+      return;
+    }
+
+    $form_state->cleanValues();
+    /** @var \Drupal\encrypt\Entity\EncryptionConfiguration $entity */
+    $this->entity = $this->buildEntity($form, $form_state);
+
+    $errors = $this->entity->validate();
+    if ($errors) {
+      $form_state->setErrorByName('encryption_key', implode(';', $errors));
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function save(array $form, FormStateInterface $form_state) {
     $encryption_profile = $this->entity;
     $status = $encryption_profile->save();
