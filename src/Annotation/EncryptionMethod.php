@@ -41,4 +41,31 @@ class EncryptionMethod extends Plugin {
    * @var \Drupal\Core\Annotation\Translation
    */
   public $description = '';
+
+
+  /**
+   * The key type(s) this encryption method should use.
+   *
+   * If none specified, all keys within the group "encryption" will be
+   * available to this encryption method.
+   *
+   * This setting should refer to a valid Plugin ID of type KeyType.
+   * For example "aes_encryption", provided by the Key module.
+   *
+   * @var array
+   */
+  public $key_type = [];
+
+  /**
+   * The key sizes allowed to be used with this encryption method.
+   *
+   * Values can be numeric value, or a range.
+   * Examples: {"128", "192", "256"} or {"32-448"}
+   *
+   * @see \Drupal\key\KeyProvider\AesEncryptionKeyType
+   *
+   * @var array
+   */
+  public $key_size = [];
+
 }
