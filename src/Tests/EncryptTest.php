@@ -23,6 +23,7 @@ class EncryptTest extends WebTestBase {
    *
    * @var bool
    */
+  // @TODO: remove if https://www.drupal.org/node/2666196 is fixed.
   protected $strictConfigSchema = FALSE;
 
   /**
