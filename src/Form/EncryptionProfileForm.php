@@ -111,6 +111,7 @@ class EncryptionProfileForm extends EntityForm {
       '#type' => 'key_select',
       '#title' => $this->t('Encryption Key'),
       '#required' => TRUE,
+      '#default_value' => $encryption_profile->getEncryptionMethod(),
     );
 
     if ($current_encryption_method = $encryption_profile->getEncryptionMethod()) {
