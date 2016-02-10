@@ -12,7 +12,8 @@ use Drupal\Core\Plugin\PluginBase;
  * @EncryptionMethod(
  *   id = "mcrypt_aes_256",
  *   title = @Translation("Mcrypt AES 256"),
- *   description = "This uses PHPs mcrypt extension and <a href='http://en.wikipedia.org/wiki/Advanced_Encryption_Standard'>AES-256</a>."
+ *   description = "This uses PHPs mcrypt extension and <a href='http://en.wikipedia.org/wiki/Advanced_Encryption_Standard'>AES-256</a>.",
+ *   key_type = {"aes_encryption"}
  * )
  */
 class McryptAES256Encryption extends PluginBase implements EncryptionMethodInterface {
