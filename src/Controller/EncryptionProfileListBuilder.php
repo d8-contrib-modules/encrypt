@@ -7,13 +7,51 @@
 
 namespace Drupal\encrypt\Controller;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a listing of encryption profile entities.
  */
 class EncryptionProfileListBuilder extends ConfigEntityListBuilder {
+
+  /**
+   * A configuration object.
+   *
+   * @var \Drupal\Core\Config\ImmutableConfig
+   */
+  protected $config;
+
+  /**
+   * Constructs a new EncryptionProfileListBuilder object.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+   *   The entity type definition.
+   * @param \Drupal\Core\Entity\EntityStorageInterface $storage
+   *   The entity storage class.
+   * @param ConfigFactoryInterface $config_factory
+   *   The configuration factory.
+   */
+  public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, ConfigFactoryInterface $config_factory) {
+    parent::__construct($entity_type, $storage);
+    $this->config = $config_factory->get('encrypt.settings');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
+    return new static(
+      $entity_type,
+      $container->get('entity.manager')->getStorage($entity_type->id()),
+      $container->get('config.factory')
+    );
+  }
+
   /**
    * {@inheritdoc}
    */
@@ -21,6 +59,9 @@ class EncryptionProfileListBuilder extends ConfigEntityListBuilder {
     $header['label'] = $this->t('Label');
     $header['id'] = $this->t('Machine name');
     $header['key'] = $this->t('Key');
+    if ($this->config->get('check_profile_status')) {
+      $header['status'] = $this->t('Status');
+    }
     return $header + parent::buildHeader();
   }
 
@@ -31,6 +72,20 @@ class EncryptionProfileListBuilder extends ConfigEntityListBuilder {
     $row['label'] = $this->getLabel($entity);
     $row['id'] = $entity->id();
     $row['key'] = $entity->getEncryptionKey();
+
+    if ($this->config->get('check_profile_status')) {
+      $errors = $entity->validate();
+      if (!empty($errors)) {
+        $row['status']['data'] = array(
+          '#theme' => 'item_list',
+          '#items' => $errors,
+          '#attributes' => array("class" => array("color-error")),
+        );
+      }
+      else {
+        $row['status'] = $this->t('OK');
+      }
+    }
     return $row + parent::buildRow($entity);
   }
 
