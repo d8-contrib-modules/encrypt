@@ -29,3 +29,11 @@ entity.encryption_profile.delete_form:
     _title: 'Delete encryption profile'
   requirements:
     _permission: 'administer encrypt'
+
+encrypt.settings:
+  path: '/admin/config/system/encryption/profiles/settings'
+  defaults:
+    _form: '\Drupal\encrypt\Form\EncryptSettingsForm'
+    _title: 'Encrypt settings'
+  requirements:
+    _permission: 'administer encrypt'

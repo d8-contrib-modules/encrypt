@@ -2,18 +2,19 @@
 
 /**
  * @file
- * Contains Drupal\encrypt\Entity\EncryptionConfiguration.
+ * Contains Drupal\encrypt\Entity\EncryptionProfile.
  */
 
 namespace Drupal\encrypt\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Component\Utility\Random;
 use Drupal\encrypt\EncryptionProfileInterface;
 use Drupal\encrypt\Exception\EncryptException;
 
 /**
- * Defines the Title entity.
+ * Defines the EncryptionProfile entity.
  *
  * @ConfigEntityType(
  *   id = "encryption_profile",
@@ -101,8 +102,10 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
    * {@inheritdoc}
    */
   public function validate() {
+    $random = new Random();
     $errors = [];
 
+    // Check if the object properties are set correctly.
     if (!$this->getEncryptionMethod()) {
       $errors[] = t('No encryption method selected.');
     }
@@ -111,13 +114,34 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
       $errors[] = t('No encryption key selected');
     }
 
-    $encryption_method_definition = static::getEncryptionMethodManager()->getDefinition($this->getEncryptionMethod());
-    $allowed_key_types = $encryption_method_definition['key_type'];
-    if (!empty($allowed_key_types)) {
+    // If the properties are set, continue validation.
+    if ($this->getEncryptionMethod() && $this->getEncryptionKey()) {
+      // Check if the linked encryption method is valid.
+      $encryption_method_definition = static::getEncryptionMethodManager()->getDefinition($this->getEncryptionMethod());
+      if (!$encryption_method_definition) {
+        $errors[] = t('The encryption method linked to this encryption profile does not exist.');
+      }
+
+      // Check if the linked encryption key is valid.
       $selected_key = $this->getKeyRepository()->getKey($this->getEncryptionKey());
-      $selected_key_type = $selected_key->getKeyType();
-      if (!in_array($selected_key_type->getPluginId(), $allowed_key_types)) {
-        $errors[] = t('The selected key cannot be used with the selected encryption method.');
+      if (!$selected_key) {
+        $errors[] = t('The key linked to this encryption profile does not exist.');
+      }
+
+      // If the encryption method and key are valid, continue validation.
+      if (empty($errors)) {
+        // Check if the selected key type matches encryption method settings.
+        $allowed_key_types = $encryption_method_definition['key_type'];
+        if (!empty($allowed_key_types)) {
+          $selected_key_type = $selected_key->getKeyType();
+          if (!in_array($selected_key_type->getPluginId(), $allowed_key_types)) {
+            $errors[] = t('The selected key cannot be used with the selected encryption method.');
+          }
+        }
+        // Check if encryption method dependencies are met.
+        $encryption_method = static::getEncryptionMethodManager()->createInstance($this->getEncryptionMethod());
+        $dependency_errors = $encryption_method->checkDependencies($random->string(), $selected_key->getKeyValue());
+        $errors = array_merge($errors, $dependency_errors);
       }
     }
 
