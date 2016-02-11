@@ -8,7 +8,9 @@
 namespace Drupal\encrypt\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\encrypt\EncryptionProfileInterface;
+use Drupal\encrypt\Exception\EncryptException;
 
 /**
  * Defines the Title entity.
@@ -57,18 +59,29 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
   protected $label;
 
   /**
-   * The encryption method, id of EncryptionMethod plugin.
+   * The encryption method, ID of EncryptionMethod plugin.
    *
-   * @var \Drupal\encrypt\EncryptionMethodInterface
+   * @var string
    */
   protected $encryption_method;
 
   /**
-   * The encryption key.
+   * The encryption key ID.
    *
    * @var string
    */
   protected $encryption_key;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preSave(EntityStorageInterface $storage) {
+    parent::preSave($storage);
+    $errors = $this->validate();
+    if (!empty($errors)) {
+      throw new EncryptException(implode(';', $errors));
+    }
+  }
 
   /**
    * {@inheritdoc}
@@ -82,6 +95,53 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
    */
   public function getEncryptionKey() {
     return $this->encryption_key;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validate() {
+    $errors = [];
+
+    if (!$this->getEncryptionMethod()) {
+      $errors[] = t('No encryption method selected.');
+    }
+
+    if (!$this->getEncryptionKey()) {
+      $errors[] = t('No encryption key selected');
+    }
+
+    $encryption_method_definition = static::getEncryptionMethodManager()->getDefinition($this->getEncryptionMethod());
+    $allowed_key_types = $encryption_method_definition['key_type'];
+    if (!empty($allowed_key_types)) {
+      $selected_key = $this->getKeyRepository()->getKey($this->getEncryptionKey());
+      $selected_key_type = $selected_key->getKeyType();
+      if (!in_array($selected_key_type->getPluginId(), $allowed_key_types)) {
+        $errors[] = t('The selected key cannot be used with the selected encryption method.');
+      }
+    }
+
+    return $errors;
+  }
+
+  /**
+   * Gets the encryption method manager.
+   *
+   * @return \Drupal\encrypt\EncryptionMethodManager
+   *   The EncryptionMethodManager.
+   */
+  protected static function getEncryptionMethodManager() {
+    return \Drupal::service('plugin.manager.encrypt.encryption_methods');
+  }
+
+  /**
+   * Gets the key repository service.
+   *
+   * @return \Drupal\Key\KeyRepository
+   *   The Key repository service.
+   */
+  protected static function getKeyRepository() {
+    return \Drupal::service('key.repository');
   }
 
 }

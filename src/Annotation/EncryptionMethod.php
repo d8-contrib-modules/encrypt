@@ -41,4 +41,13 @@ class EncryptionMethod extends Plugin {
    * @var \Drupal\Core\Annotation\Translation
    */
   public $description = '';
+
+  /**
+   * Define key type(s) this encryption method should be restricted to.
+   *
+   * Return an array of KeyType plugin IDs that restrict the allowed key types
+   * for usage with this encryption method.
+   */
+  public $key_type = [];
+
 }

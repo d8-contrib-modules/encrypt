@@ -19,9 +19,7 @@ cd "$DRUPAL_TI_DRUPAL_DIR"
 mkdir -p "$DRUPAL_TI_DRUPAL_DIR/$DRUPAL_TI_MODULES_PATH"
 cd "$DRUPAL_TI_DRUPAL_DIR/$DRUPAL_TI_MODULES_PATH"
 
-# Manually clone the dependencies
-git clone --depth 1 https://github.com/d8-contrib-modules/key.git
-
 # We need to perform the composer manager install for seclib submodule
 cd "$DRUPAL_TI_DRUPAL_DIR"
 drush dl composer_manager --dev -y
+drush dl key --dev -y

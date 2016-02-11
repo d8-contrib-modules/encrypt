@@ -1,0 +1,6 @@
+name: 'Encrypt Test module'
+type: module
+description: 'Test module for Encrypt'
+core: 8.x
+dependencies:
+  - encrypt
