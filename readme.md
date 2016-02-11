@@ -22,7 +22,7 @@ After configuring the service, the service provides the ability to encrypt and d
 ### Encrypt
 ```
 use Drupal\encrypt\Entity\EncryptionProfile;
-$encryption_profile = EncryptionProfile::load($instance_id);`
+$encryption_profile = EncryptionProfile::load($instance_id);
 Drupal::service('encryption')->encrypt($string, $encryption_profile);
 ```
 
