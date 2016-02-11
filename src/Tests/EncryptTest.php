@@ -40,10 +40,18 @@ class EncryptTest extends WebTestBase {
    */
   protected $adminUser;
 
+
+  /**
+   * A test key.
+   *
+   * @var \Drupal\key\Entity\Key
+   */
+  protected $testKey;
+
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp() {
     parent::setUp();
 
     $this->adminUser = $this->drupalCreateUser([
@@ -51,15 +59,14 @@ class EncryptTest extends WebTestBase {
       'administer encrypt',
       'administer keys',
     ]);
+    $this->drupalLogin($this->adminUser);
+    $this->createTestKey();
   }
 
   /**
-   * Test adding an encryption profile and encrypting / decrypting with it.
+   * Creates a test key for usage in the tests.
    */
-  public function testEncryptAndDecrypt() {
-    $this->drupalLogin($this->adminUser);
-
-    // Create a test Key entity.
+  protected function createTestKey() {
     $this->drupalGet('admin/config/system/keys/add');
     $edit = [
       'key_type' => 'encryption',
@@ -80,9 +87,51 @@ class EncryptTest extends WebTestBase {
     ];
     $this->drupalPostForm(NULL, $edit, t('Save'));
 
-    $saved_key = \Drupal::service('key.repository')->getKey('testing_key');
-    $this->assertTrue($saved_key, 'Key was succesfully saved.');
+    $this->testKey = \Drupal::service('key.repository')->getKey('testing_key');
+    $this->assertTrue($this->testKey, 'Key was succesfully saved.');
+  }
 
+  /**
+   * Test adding an encryption profile and encrypting / decrypting with it.
+   */
+  public function testEncryptAndDecrypt() {
+    // Create an encryption profile config entity.
+    $this->drupalGet('admin/config/system/encryption/profiles/add');
+
+    // Check if the plugin exists.
+    $this->assertOption('edit-encryption-method', 'test_encryption_method', t('Encryption method option is present.'));
+    $this->assertText('Test Encryption method', t('Encryption method text is present'));
+
+    $edit = [
+      'encryption_method' => 'test_encryption_method',
+    ];
+    $this->drupalPostAjaxForm(NULL, $edit, 'encryption_method');
+
+    $edit = [
+      'id' => 'test_encryption_profile',
+      'label' => 'Test encryption profile',
+      'encryption_method' => 'test_encryption_method',
+      'encryption_key' => $this->testKey->id(),
+    ];
+    $this->drupalPostForm('admin/config/system/encryption/profiles/add', $edit, t('Save'));
+
+    $encryption_profile = \Drupal::service('entity.manager')->getStorage('encryption_profile')->load('test_encryption_profile');
+    $this->assertTrue($encryption_profile, 'Encryption profile was succesfully saved.');
+
+    // Test the encryption service with our encryption profile.
+    $test_string = 'testing 123 &*#';
+    $enc_string = \Drupal::service('encryption')->encrypt($test_string, $encryption_profile);
+    $this->assertEqual($enc_string, 'zhfgorfvkgrraovggrfgvat 123 &*#', 'The encryption service is not properly processing');
+
+    // Test the decryption service with our encryption profile.
+    $dec_string = \Drupal::service('encryption')->decrypt($enc_string, $encryption_profile);
+    $this->assertEqual($dec_string, $test_string, 'The decryption service is not properly processing');
+  }
+
+  /**
+   * Tests validation of encryption profiles.
+   */
+  public function testProfileValidation() {
     // Create an encryption profile config entity.
     $this->drupalGet('admin/config/system/encryption/profiles/add');
 
@@ -103,17 +152,19 @@ class EncryptTest extends WebTestBase {
     ];
     $this->drupalPostForm('admin/config/system/encryption/profiles/add', $edit, t('Save'));
 
-    $encryption_profile = \Drupal::service('entity.manager')->getStorage('encryption_profile')->load('test_encryption_profile');
-    $this->assertTrue($encryption_profile, 'Encryption profile was succesfully saved.');
+    // Now delete the testkey.
+    $this->testKey->delete();
 
-    // Test the encryption service with our encryption profile.
-    $test_string = 'testing 123 &*#';
-    $enc_string = \Drupal::service('encryption')->encrypt($test_string, $encryption_profile);
-    $this->assertEqual($enc_string, 'zhfgorfvkgrraovggrfgvat 123 &*#', 'The encryption service is not properly processing');
+    // Check if the error message is shown.
+    $this->drupalGet('admin/config/system/encryption/profiles');
+    $this->assertText('The key linked to this encryption profile does not exist.');
 
-    // Test the decryption service with our encryption profile.
-    $dec_string = \Drupal::service('encryption')->decrypt($enc_string, $encryption_profile);
-    $this->assertEqual($dec_string, $test_string, 'The decryption service is not properly processing');
+    // Test "check_profile_status" setting.
+    $this->config('encrypt.settings')
+      ->set('check_profile_status', FALSE)
+      ->save();
+    $this->drupalGet('admin/config/system/encryption/profiles');
+    $this->assertNoText('The key linked to this encryption profile does not exist.');
   }
 
 }
