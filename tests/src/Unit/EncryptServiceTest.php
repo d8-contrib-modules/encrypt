@@ -114,8 +114,7 @@ class EncryptServiceTest extends UnitTestCase {
       ->setMethods([
         'getEncryptionKeyValue',
         'getEncryptionMethod',
-        ]
-      )
+      ])
       ->setConstructorArgs(array(
         $this->encryptManager,
         $this->keyRepository,
@@ -149,9 +148,9 @@ class EncryptServiceTest extends UnitTestCase {
     // Set up a mock for the EncryptService class to mock some methods.
     $encrypt_service = $this->getMockBuilder('\Drupal\encrypt\EncryptService')
       ->setMethods([
-          'getEncryptionKeyValue',
-          'getEncryptionMethod',
-        ]
+        'getEncryptionKeyValue',
+        'getEncryptionMethod',
+      ]
       )
       ->setConstructorArgs(array(
         $this->encryptManager,
@@ -193,9 +192,9 @@ class EncryptServiceTest extends UnitTestCase {
     // Set up a mock for the EncryptService class to mock some methods.
     $encrypt_service = $this->getMockBuilder('\Drupal\encrypt\EncryptService')
       ->setMethods([
-          'getEncryptionMethod',
-          'loadEncryptionProfileKey',
-        ]
+        'getEncryptionMethod',
+        'loadEncryptionProfileKey',
+      ]
       )
       ->setConstructorArgs(array(
         $this->encryptManager,
