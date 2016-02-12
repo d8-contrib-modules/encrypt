@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains Drupal\encrypt\EncryptionProfileInterface.
@@ -13,17 +12,20 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
  * Provides an interface for defining Title entities.
  */
 interface EncryptionProfileInterface extends ConfigEntityInterface {
+
   /**
    * Gets the encryption configuration method.
    *
-   * @return \Drupal\encrypt\EncryptionMethodInterface
+   * @return string
+   *   The plugin ID of the selected EncryptionMethod plugin.
    */
   public function getEncryptionMethod();
 
   /**
    * Gets the encryption profile key.
    *
-   * @return \Drupal\key\KeyInterface
+   * @return string
+   *   The ID of the selected Key entity.
    */
   public function getEncryptionKey();
 

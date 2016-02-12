@@ -1,4 +1,9 @@
 <?php
+/**
+ * @file
+ * Contains \Drupal\encrypt\EncryptionMethodManager.
+ */
+
 namespace Drupal\encrypt;
 
 use Drupal\Core\Cache\CacheBackendInterface;
