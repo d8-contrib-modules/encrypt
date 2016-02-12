@@ -4,7 +4,7 @@
  * Contains Drupal\Tests\encrypt\Unit\Entity\EncryptionProfileTest.
  */
 
-namespace Drupal\Tests\encrypt\Unit\Entitys;
+namespace Drupal\Tests\encrypt\Unit\Entity;
 
 use Drupal\Tests\UnitTestCase;
 
@@ -189,7 +189,7 @@ class EncryptionProfileTest extends UnitTestCase {
         $valid_definition,
         ['The key linked to this encryption profile does not exist.'],
       ],
-      'normal' => [
+      'invalid_keytypes' => [
         'test_encryption_method',
         'test_key',
         $invalid_allowed_keytypes,
