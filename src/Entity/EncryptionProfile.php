@@ -117,7 +117,7 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
     // If the properties are set, continue validation.
     if ($this->getEncryptionMethod() && $this->getEncryptionKey()) {
       // Check if the linked encryption method is valid.
-      $encryption_method_definition = static::getEncryptionMethodManager()->getDefinition($this->getEncryptionMethod());
+      $encryption_method_definition = $this->getEncryptionMethodManager()->getDefinition($this->getEncryptionMethod());
       if (!$encryption_method_definition) {
         $errors[] = t('The encryption method linked to this encryption profile does not exist.');
       }
@@ -139,7 +139,7 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
           }
         }
         // Check if encryption method dependencies are met.
-        $encryption_method = static::getEncryptionMethodManager()->createInstance($this->getEncryptionMethod());
+        $encryption_method = $this->getEncryptionMethodManager()->createInstance($this->getEncryptionMethod());
         $dependency_errors = $encryption_method->checkDependencies($random->string(), $selected_key->getKeyValue());
         $errors = array_merge($errors, $dependency_errors);
       }
@@ -154,7 +154,7 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
    * @return \Drupal\encrypt\EncryptionMethodManager
    *   The EncryptionMethodManager.
    */
-  protected static function getEncryptionMethodManager() {
+  protected function getEncryptionMethodManager() {
     return \Drupal::service('plugin.manager.encrypt.encryption_methods');
   }
 
@@ -164,7 +164,7 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
    * @return \Drupal\Key\KeyRepository
    *   The Key repository service.
    */
-  protected static function getKeyRepository() {
+  protected function getKeyRepository() {
     return \Drupal::service('key.repository');
   }
 
