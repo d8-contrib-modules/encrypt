@@ -82,7 +82,7 @@ class EncryptionProfileForm extends EntityForm {
       $form['confirm_edit'] = array(
         '#type' => 'checkbox',
         '#title' => $this->t('I understand the risks of editing this encryption profile.'),
-        '#description' => $this->t('Please acknowledge that you understand editing this encryption profile will make data that was previously encrypted with this profile <strong>unencryptable</strong>.'),
+        '#description' => $this->t('Please acknowledge that you understand editing this encryption profile will make data that was previously encrypted with this profile <strong>unencryptable</strong>. After you checked this box and pressed the "Save" button, you will be able to edit this existing profile.'),
       );
     }
 
