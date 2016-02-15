@@ -3,7 +3,6 @@
 namespace Drupal\encrypt\Plugin\EncryptionMethod;
 
 use Drupal\encrypt\EncryptionMethodInterface;
-use Drupal\Core\Plugin\PluginBase;
 
 /**
  * Class McryptAES256Encryption
@@ -16,7 +15,7 @@ use Drupal\Core\Plugin\PluginBase;
  *   key_type = {"aes_encryption"}
  * )
  */
-class McryptAES256Encryption extends PluginBase implements EncryptionMethodInterface {
+class McryptAES256Encryption extends EncryptionMethodBase implements EncryptionMethodInterface {
 
   /**
    * @return mixed
@@ -81,4 +80,5 @@ class McryptAES256Encryption extends PluginBase implements EncryptionMethodInter
     // Decrypt text.
     return trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $key, $text, MCRYPT_MODE_ECB, $iv));
   }
+
 }

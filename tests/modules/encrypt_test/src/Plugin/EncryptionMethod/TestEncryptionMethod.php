@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Contains \Drupal\encrypt_test\Plugin\EncryptionMethod\TestEncryptionMethod.
@@ -7,7 +8,7 @@
 namespace Drupal\encrypt_test\Plugin\EncryptionMethod;
 
 use Drupal\encrypt\EncryptionMethodInterface;
-use Drupal\Core\Plugin\PluginBase;
+use Drupal\encrypt\Plugin\EncryptionMethod\EncryptionMethodBase;
 
 /**
  * TestEncryptionMethod testing class.
@@ -19,7 +20,7 @@ use Drupal\Core\Plugin\PluginBase;
  *   key_type = {"encryption"}
  * )
  */
-class TestEncryptionMethod extends PluginBase implements EncryptionMethodInterface {
+class TestEncryptionMethod extends EncryptionMethodBase implements EncryptionMethodInterface {
 
   /**
    * {@inheritdoc}

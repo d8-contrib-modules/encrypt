@@ -107,8 +107,7 @@ class EncryptService implements EncryptServiceInterface {
    */
   protected function getEncryptionKeyValue($text, EncryptionProfile $encryption_profile) {
     // Load the encryption method.
-    $enc_method = $encryption_profile->getEncryptionMethod();
-    $this->encryptionMethod = $this->encryptManager->createInstance($enc_method);
+    $this->encryptionMethod = $encryption_profile->getEncryptionMethod();
 
     // Load the encryption key.
     $key_value = $this->loadEncryptionProfileKey($encryption_profile);
@@ -135,8 +134,8 @@ class EncryptService implements EncryptServiceInterface {
    *   The encryption key value.
    */
   protected function loadEncryptionProfileKey(EncryptionProfile $encryption_profile) {
-    $key_id = $encryption_profile->getEncryptionKey();
-    return $this->keyRepository->getKey($key_id)->getKeyValue();
+    $key = $encryption_profile->getEncryptionKey();
+    return $key->getKeyValue();
   }
 
 }

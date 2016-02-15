@@ -4,9 +4,12 @@
  * Contains Drupal\Tests\encrypt\Unit\Entity\EncryptionProfileTest.
  */
 
-namespace Drupal\Tests\encrypt\Unit\Entitys;
+namespace Drupal\Tests\encrypt\Unit\Entity;
 
+use Drupal\key\KeyInterface;
 use Drupal\Tests\UnitTestCase;
+use Drupal\encrypt\EncryptionMethodInterface;
+use Drupal\encrypt\Entity\EncryptionProfile;
 
 /**
  * Unit tests for EncryptionProfile class.
@@ -106,9 +109,10 @@ class EncryptionProfileTest extends UnitTestCase {
     $encryption_profile = $this->getMockBuilder('\Drupal\encrypt\Entity\EncryptionProfile')
       ->setMethods([
         'getEncryptionMethod',
+        'getEncryptionMethodId',
         'getEncryptionKey',
+        'getEncryptionKeyId',
         'getEncryptionMethodManager',
-        'getKeyRepository',
       ]
       )
       ->disableOriginalConstructor()
@@ -119,39 +123,31 @@ class EncryptionProfileTest extends UnitTestCase {
       ->method('getDefinition')
       ->with($this->equalTo('test_encryption_method'))
       ->will($this->returnValue($enc_method_def));
-    $this->encryptionMethodManager->expects($this->any())
-      ->method('createInstance')
-      ->with($this->equalTo('test_encryption_method'))
-      ->will($this->returnValue($this->encryptionMethod));
-
-    // Set expectations for KeyRepository.
-    if ($enc_key == "test_key") {
-      $this->keyRepository->expects($this->any())
-        ->method('getKey')
-        ->will($this->returnValue($this->key));
-    }
-    if ($enc_key == "wrong_key") {
-      $this->keyRepository->expects($this->any())
-        ->method('getKey')
-        ->will($this->returnValue(FALSE));
-    }
 
     // Set expectations for EncryptionProfile entity.
     $encryption_profile->expects($this->any())
-      ->method('getEncryptionMethod')
+      ->method('getEncryptionMethodId')
       ->will($this->returnValue($enc_method_id));
-
     $encryption_profile->expects($this->any())
-      ->method('getEncryptionKey')
+      ->method('getEncryptionKeyId')
       ->will($this->returnValue($enc_key));
+    $encryption_profile->expects($this->any())
+      ->method('getEncryptionMethod')
+      ->will($this->returnValue($this->encryptionMethod));
+    if ($enc_key == "test_key") {
+      $encryption_profile->expects($this->any())
+        ->method('getEncryptionKey')
+        ->will($this->returnValue($this->key));
+    }
+    if ($enc_key == "wrong_key") {
+      $encryption_profile->expects($this->any())
+        ->method('getEncryptionKey')
+        ->will($this->returnValue(FALSE));
+    }
 
     $encryption_profile->expects($this->any())
       ->method('getEncryptionMethodManager')
       ->will($this->returnValue($this->encryptionMethodManager));
-
-    $encryption_profile->expects($this->any())
-      ->method('getKeyRepository')
-      ->will($this->returnValue($this->keyRepository));
 
     $errors = $encryption_profile->validate();
     $this->assertEquals($expected_errors, $errors);
@@ -175,7 +171,7 @@ class EncryptionProfileTest extends UnitTestCase {
         NULL,
         NULL,
         NULL,
-        ['No encryption method selected.', 'No encryption key selected'],
+        ['No encryption method selected.', 'No encryption key selected.'],
       ],
       'invalid_encryption_method' => [
         'test_encryption_method',
@@ -189,7 +185,7 @@ class EncryptionProfileTest extends UnitTestCase {
         $valid_definition,
         ['The key linked to this encryption profile does not exist.'],
       ],
-      'normal' => [
+      'invalid_keytypes' => [
         'test_encryption_method',
         'test_key',
         $invalid_allowed_keytypes,
@@ -202,6 +198,106 @@ class EncryptionProfileTest extends UnitTestCase {
         [],
       ],
     ];
+  }
+
+  /**
+   * Tests the getEncryptionMethod method.
+   *
+   * @covers ::getEncryptionMethod
+   */
+  public function testGetEncryptionMethod() {
+    // Set up a mock for the EncryptionProfile class to mock some methods.
+    $encryption_profile = $this->getMockBuilder('\Drupal\encrypt\Entity\EncryptionProfile')
+      ->setMethods([
+        'getEncryptionMethodManager',
+        'getEncryptionMethodId',
+      ]
+      )
+      ->disableOriginalConstructor()
+      ->getMock();
+
+    $this->encryptionMethodManager->expects($this->any())
+      ->method('createInstance')
+      ->with($this->equalTo('test_encryption_method'))
+      ->will($this->returnValue($this->encryptionMethod));
+
+    $encryption_profile->expects($this->any())
+      ->method('getEncryptionMethodManager')
+      ->will($this->returnValue($this->encryptionMethodManager));
+
+    $encryption_profile->expects($this->any())
+      ->method('getEncryptionMethodId')
+      ->will($this->returnValue('test_encryption_method'));
+
+    $result = $encryption_profile->getEncryptionMethod();
+    $this->assertTrue($result instanceof EncryptionMethodInterface);
+  }
+
+  /**
+   * Tests the setEncryptionMethod method.
+   *
+   * @covers ::setEncryptionMethod
+   */
+  public function testSetEncryptionMethod() {
+    $encryption_profile = new EncryptionProfile([], 'encryption_profile');
+
+    // Set up expectations for encryption method.
+    $this->encryptionMethod->expects($this->any())
+      ->method('getPluginId')
+      ->will($this->returnValue('test_encryption_method'));
+
+    $encryption_profile->setEncryptionMethod($this->encryptionMethod);
+    $this->assertEquals("test_encryption_method", $encryption_profile->getEncryptionMethodId());
+  }
+
+  /**
+   * Tests the getEncryptionKey method.
+   *
+   * @covers ::getEncryptionKey
+   */
+  public function testGetEncryptionKey() {
+    // Set up a mock for the EncryptionProfile class to mock some methods.
+    $encryption_profile = $this->getMockBuilder('\Drupal\encrypt\Entity\EncryptionProfile')
+      ->setMethods([
+        'getKeyRepository',
+        'getEncryptionKeyId',
+      ]
+      )
+      ->disableOriginalConstructor()
+      ->getMock();
+
+    $this->keyRepository->expects($this->any())
+      ->method('getKey')
+      ->with($this->equalTo('test_key'))
+      ->will($this->returnValue($this->key));
+
+    $encryption_profile->expects($this->any())
+      ->method('getKeyRepository')
+      ->will($this->returnValue($this->keyRepository));
+
+    $encryption_profile->expects($this->any())
+      ->method('getEncryptionKeyId')
+      ->will($this->returnValue('test_key'));
+
+    $result = $encryption_profile->getEncryptionKey();
+    $this->assertTrue($result instanceof KeyInterface);
+  }
+
+  /**
+   * Tests the setEncryptionKey method.
+   *
+   * @covers ::setEncryptionKey
+   */
+  public function testSetEncryptionKey() {
+    $encryption_profile = new EncryptionProfile([], 'encryption_profile');
+
+    // Set up expectations for key entity.
+    $this->key->expects($this->any())
+      ->method('id')
+      ->will($this->returnValue('test_key'));
+
+    $encryption_profile->setEncryptionKey($this->key);
+    $this->assertEquals("test_key", $encryption_profile->getEncryptionKeyId());
   }
 
 }

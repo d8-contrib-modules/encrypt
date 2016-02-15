@@ -58,6 +58,7 @@ class EncryptionProfileListBuilder extends ConfigEntityListBuilder {
   public function buildHeader() {
     $header['label'] = $this->t('Label');
     $header['id'] = $this->t('Machine name');
+    $header['encryption_method'] = $this->t('Encryption method');
     $header['key'] = $this->t('Key');
     if ($this->config->get('check_profile_status')) {
       $header['status'] = $this->t('Status');
@@ -69,10 +70,26 @@ class EncryptionProfileListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    $row['label'] = $this->getLabel($entity);
+    $row['label'] = $entity->label();
     $row['id'] = $entity->id();
-    $row['key'] = $entity->getEncryptionKey();
 
+    // Render encryption method row.
+    if ($encryption_method = $entity->getEncryptionMethod()) {
+      $row['encryption_method'] = $encryption_method->getLabel();
+    }
+    else {
+      $row['encryption_method'] = $this->t('Error loading encryption method');
+    }
+
+    // Render encryption key row.
+    if ($key = $entity->getEncryptionKey()) {
+      $row['key'] = $key->label();
+    }
+    else {
+      $row['key'] = $this->t('Error loading key');
+    }
+
+    // Render status report row.
     if ($this->config->get('check_profile_status')) {
       $errors = $entity->validate();
       if (!empty($errors)) {
