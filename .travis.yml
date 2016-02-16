@@ -95,7 +95,7 @@ install:
 
 before_script:
   # We run our script to add module dependencies
-  - if [ -n "$GH_TOKEN" ]; then composer config github-oauth.github.com ${GH_TOKEN}; fi;
+  #- if [ -n "$GH_TOKEN" ]; then composer config github-oauth.github.com ${GH_TOKEN}; fi;
   - drupal-ti --include drupal_ti/before/before_script.sh
   - drupal-ti before_script
   - drupal-ti --include drupal_ti/after/before_script.sh
