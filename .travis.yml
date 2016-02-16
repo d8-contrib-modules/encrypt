@@ -76,8 +76,7 @@ env:
     #- DRUPAL_TI_DEBUG_FILE_OUTPUT="selenium xvfb webserver"
 
   matrix:
-    #- DRUPAL_TI_RUNNERS="phpunit simpletest"
-    - DRUPAL_TI_RUNNERS="simpletest"
+    - DRUPAL_TI_RUNNERS="phpunit simpletest"
 
 mysql:
   database: drupal_travis_db
