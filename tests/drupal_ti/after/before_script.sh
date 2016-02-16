@@ -26,4 +26,5 @@ cd "$DRUPAL_TI_DRUPAL_DIR"
 # composer
 composer drupal-rebuild
 # https://github.com/composer/composer/issues/1314
-composer drupal-update --no-interaction
+#composer drupal-update --no-interaction --prefer-source
+composer update -n --lock --verbose

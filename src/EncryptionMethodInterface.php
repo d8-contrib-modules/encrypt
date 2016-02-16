@@ -54,4 +54,12 @@ interface EncryptionMethodInterface extends PluginInspectionInterface {
    */
   public function checkDependencies($text = NULL, $key = NULL);
 
+  /**
+   * Get the label.
+   *
+   * @return string
+   *   The label for this EncryptionMethod plugin.
+   */
+  public function getLabel();
+
 }

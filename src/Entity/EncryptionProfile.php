@@ -12,6 +12,8 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Component\Utility\Random;
 use Drupal\encrypt\EncryptionProfileInterface;
 use Drupal\encrypt\Exception\EncryptException;
+use Drupal\encrypt\EncryptionMethodInterface;
+use Drupal\key\Entity\Key;
 
 /**
  * Defines the EncryptionProfile entity.
@@ -41,6 +43,12 @@ use Drupal\encrypt\Exception\EncryptException;
  *     "edit-form" = "/admin/config/system/encryption/profiles/manage/{encryption_profile}",
  *     "delete-form" = "/admin/config/system/encryption/profiles/manage/{encryption_profile}/delete",
  *     "collection" = "/admin/config/system/encryption/profiles"
+ *   },
+ *   config_export = {
+ *     "id",
+ *     "label",
+ *     "encryption_method",
+ *     "encryption_key",
  *   }
  * )
  */
@@ -60,18 +68,32 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
   protected $label;
 
   /**
-   * The encryption method, ID of EncryptionMethod plugin.
+   * The ID of EncryptionMethod plugin.
    *
    * @var string
    */
   protected $encryption_method;
 
   /**
-   * The encryption key ID.
+   * Stores a reference to the EncryptionMethod plugin for this profile.
+   *
+   * @var \Drupal\encrypt\EncryptionMethodInterface
+   */
+  protected $encryption_method_plugin;
+
+  /**
+   * The ID of Key entity.
    *
    * @var string
    */
   protected $encryption_key;
+
+  /**
+   * Stores a reference to the Key entity for this profile.
+   *
+   * @var \Drupal\key\Entity\Key.
+   */
+  protected $encryption_key_entity;
 
   /**
    * {@inheritdoc}
@@ -88,14 +110,50 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
    * {@inheritdoc}
    */
   public function getEncryptionMethod() {
+    if (!isset($this->encryption_method_plugin)) {
+      $this->encryption_method_plugin = $this->getEncryptionMethodManager()->createInstance($this->getEncryptionMethodId());
+    }
+    return $this->encryption_method_plugin;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getEncryptionMethodId() {
     return $this->encryption_method;
   }
 
   /**
    * {@inheritdoc}
    */
+  public function setEncryptionMethod(EncryptionMethodInterface $encryption_method) {
+    $this->encryption_method_plugin = $encryption_method;
+    $this->encryption_method = $encryption_method->getPluginId();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getEncryptionKey() {
+    if (!isset($this->encryption_key_entity)) {
+      $this->encryption_key_entity = $this->getKeyRepository()->getKey($this->getEncryptionKeyId());
+    }
+    return $this->encryption_key_entity;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getEncryptionKeyId() {
     return $this->encryption_key;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setEncryptionKey(Key $key) {
+    $this->encryption_key_entity = $key;
+    $this->encryption_key = $key->id();
   }
 
   /**
@@ -106,24 +164,24 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
     $errors = [];
 
     // Check if the object properties are set correctly.
-    if (!$this->getEncryptionMethod()) {
+    if (!$this->getEncryptionMethodId()) {
       $errors[] = t('No encryption method selected.');
     }
 
-    if (!$this->getEncryptionKey()) {
-      $errors[] = t('No encryption key selected');
+    if (!$this->getEncryptionKeyId()) {
+      $errors[] = t('No encryption key selected.');
     }
 
     // If the properties are set, continue validation.
-    if ($this->getEncryptionMethod() && $this->getEncryptionKey()) {
+    if ($this->getEncryptionMethodId() && $this->getEncryptionKeyId()) {
       // Check if the linked encryption method is valid.
-      $encryption_method_definition = $this->getEncryptionMethodManager()->getDefinition($this->getEncryptionMethod());
+      $encryption_method_definition = $this->getEncryptionMethodManager()->getDefinition($this->getEncryptionMethodId());
       if (!$encryption_method_definition) {
         $errors[] = t('The encryption method linked to this encryption profile does not exist.');
       }
 
       // Check if the linked encryption key is valid.
-      $selected_key = $this->getKeyRepository()->getKey($this->getEncryptionKey());
+      $selected_key = $this->getEncryptionKey();
       if (!$selected_key) {
         $errors[] = t('The key linked to this encryption profile does not exist.');
       }
@@ -139,7 +197,7 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
           }
         }
         // Check if encryption method dependencies are met.
-        $encryption_method = $this->getEncryptionMethodManager()->createInstance($this->getEncryptionMethod());
+        $encryption_method = $this->getEncryptionMethod();
         $dependency_errors = $encryption_method->checkDependencies($random->string(), $selected_key->getKeyValue());
         $errors = array_merge($errors, $dependency_errors);
       }

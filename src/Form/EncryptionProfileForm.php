@@ -21,16 +21,18 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class EncryptionProfileForm extends EntityForm {
 
   /**
+   * The configuration factory.
+   *
    * @var \Drupal\Core\Config\ConfigFactory
    */
-  protected $config_factory;
+  protected $configFactory;
 
   /**
-   * EncryptService definition.
+   * The EncryptService definition.
    *
    * @var \Drupal\encrypt\EncryptService
    */
-  protected $encrypt_service;
+  protected $encryptService;
 
   /**
    * Constructs a EncryptionProfileForm object.
@@ -41,8 +43,8 @@ class EncryptionProfileForm extends EntityForm {
    *   The lazy context repository service.
    */
   public function __construct(ConfigFactoryInterface $config_factory, EncryptService $encrypt_service) {
-    $this->config_factory = $config_factory;
-     $this->encrypt_service = $encrypt_service;
+    $this->configFactory = $config_factory;
+    $this->encryptService = $encrypt_service;
   }
 
   /**
@@ -61,7 +63,7 @@ class EncryptionProfileForm extends EntityForm {
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
 
-    /** @var $encryption_profile \Drupal\encrypt\Entity\EncryptionProfile */
+    /* @var $encryption_profile \Drupal\encrypt\Entity\EncryptionProfile */
     $encryption_profile = $this->entity;
     $form['label'] = array(
       '#type' => 'textfield',
@@ -88,7 +90,7 @@ class EncryptionProfileForm extends EntityForm {
       '#suffix' => '</div>',
     );
 
-    $encryption_methods = $this->encrypt_service->loadEncryptionMethods();
+    $encryption_methods = $this->encryptService->loadEncryptionMethods();
     $method_options = [];
     foreach ($encryption_methods as $plugin_id => $definition) {
       $method_options[$plugin_id] = (string) $definition['title'];
@@ -99,7 +101,7 @@ class EncryptionProfileForm extends EntityForm {
       '#description' => $this->t('Select the method used for encryption'),
       '#options' => $method_options,
       '#required' => TRUE,
-      '#default_value' => $encryption_profile->getEncryptionMethod(),
+      '#default_value' => $encryption_profile->getEncryptionMethodId(),
       '#ajax' => array(
         'callback' => [$this, 'ajaxUpdateSettings'],
         'event' => 'change',
@@ -111,10 +113,10 @@ class EncryptionProfileForm extends EntityForm {
       '#type' => 'key_select',
       '#title' => $this->t('Encryption Key'),
       '#required' => TRUE,
-      '#default_value' => $encryption_profile->getEncryptionMethod(),
+      '#default_value' => $encryption_profile->getEncryptionKeyId(),
     );
 
-    if ($current_encryption_method = $encryption_profile->getEncryptionMethod()) {
+    if ($current_encryption_method = $encryption_profile->getEncryptionMethodId()) {
       $key_type_filter = $encryption_methods[$current_encryption_method]['key_type'];
       if (!empty($key_type_filter)) {
         $form['encryption']['encryption_key']['#key_filters'] = ['type' => $key_type_filter];
@@ -128,7 +130,9 @@ class EncryptionProfileForm extends EntityForm {
    * AJAX callback to update the dynamic settings on the form.
    *
    * @param array $form
+   *   The form definition array for the encryption profile form.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
    *
    * @return array
    *   The element to update in the form.

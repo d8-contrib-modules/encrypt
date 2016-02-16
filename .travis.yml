@@ -76,6 +76,7 @@ env:
     #- DRUPAL_TI_DEBUG_FILE_OUTPUT="selenium xvfb webserver"
 
   matrix:
+    #- DRUPAL_TI_RUNNERS="phpunit simpletest"
     - DRUPAL_TI_RUNNERS="simpletest"
 
 mysql:
@@ -85,6 +86,8 @@ mysql:
 
 before_install:
   - composer self-update
+  # Add the oauth token to prevent GitHub timeouts
+  - if [ -n "$GH_TOKEN" ]; then composer config github-oauth.github.com ${GH_TOKEN}; fi;
   - cd ./tests
   - composer global require "lionsad/drupal_ti:1.*"
   - drupal-ti before_install

@@ -83,9 +83,9 @@ class EncryptServiceTest extends UnitTestCase {
    */
   public function testLoadEncryptionMethods() {
     $definitions = array(
-      'mcrypt_aes_256_test' => array(
-        'id' => 'mcrypt_aes_256_test',
-        'title' => "Mcrypt AES 256 test",
+      'test_encryption_method' => array(
+        'id' => 'test_encryption_method',
+        'title' => "Test encryption method",
       ),
     );
 
@@ -99,7 +99,7 @@ class EncryptServiceTest extends UnitTestCase {
     );
 
     $methods = $service->loadEncryptionMethods();
-    $this->assertEquals(['mcrypt_aes_256_test'], array_keys($methods));
+    $this->assertEquals(['test_encryption_method'], array_keys($methods));
   }
 
   /**
@@ -130,7 +130,7 @@ class EncryptServiceTest extends UnitTestCase {
       ->method('getEncryptionKeyValue')
       ->will($this->returnValue('encryption_key'));
 
-    $encrypt_service->expects($this->once())
+    $encrypt_service->expects($this->any())
       ->method('getEncryptionMethod')
       ->will($this->returnValue($this->encryptionMethod));
 
@@ -167,7 +167,7 @@ class EncryptServiceTest extends UnitTestCase {
       ->method('getEncryptionKeyValue')
       ->will($this->returnValue('encryption_key'));
 
-    $encrypt_service->expects($this->once())
+    $encrypt_service->expects($this->any())
       ->method('getEncryptionMethod')
       ->will($this->returnValue($this->encryptionMethod));
 
@@ -183,18 +183,9 @@ class EncryptServiceTest extends UnitTestCase {
    * @dataProvider encryptionKeyValueDataProvider
    */
   public function testGetEncryptionKeyValue($key, $valid_key) {
-    // Set up expectations for the encryption manager.
-    $this->encryptManager->expects($this->any())
-      ->method('createInstance')
-      ->with($this->equalTo('test_encryption_method'))
-      ->will($this->returnValue($this->encryptionMethod));
-
     // Set up a mock for the EncryptService class to mock some methods.
     $encrypt_service = $this->getMockBuilder('\Drupal\encrypt\EncryptService')
-      ->setMethods([
-        'getEncryptionMethod',
-        'loadEncryptionProfileKey',
-      ]
+      ->setMethods(['loadEncryptionProfileKey']
       )
       ->setConstructorArgs(array(
         $this->encryptManager,
@@ -210,7 +201,7 @@ class EncryptServiceTest extends UnitTestCase {
       $this->encryptionMethod->expects($this->once())
         ->method('checkDependencies')
         ->will($this->returnValue(array()));
-      $encrypt_service->expects($this->once())
+      $encrypt_service->expects($this->any())
         ->method('getEncryptionMethod')
         ->will($this->returnValue($this->encryptionMethod));
     }
@@ -225,11 +216,10 @@ class EncryptServiceTest extends UnitTestCase {
         ->method('getEncryptionMethod');
     }
 
-    // Set up expectation for handling of encryption profile by
-    // the getEncryptionKeyValue() method.
-    $this->encryptionProfile->expects($this->once())
+    // Set up expectations for encryption profile.
+    $this->encryptionProfile->expects($this->any())
       ->method('getEncryptionMethod')
-      ->will($this->returnValue("test_encryption_method"));
+      ->will($this->returnValue($this->encryptionMethod));
 
     $encrypt_service->expects($this->once())
       ->method('loadEncryptionProfileKey')
