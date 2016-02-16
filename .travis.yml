@@ -76,7 +76,7 @@ env:
     #- DRUPAL_TI_DEBUG_FILE_OUTPUT="selenium xvfb webserver"
 
   matrix:
-    - DRUPAL_TI_RUNNERS="simpletest"
+    - DRUPAL_TI_RUNNERS="phpunit simpletest"
 
 mysql:
   database: drupal_travis_db
@@ -84,8 +84,9 @@ mysql:
   encoding: utf8
 
 before_install:
-  - if [ -n "$GH_TOKEN" ]; then git config --global github.accesstoken ${GH_TOKEN}; fi;
   - composer self-update
+  # Add the oauth token to prevent GitHub timeouts
+  - if [ -n "$GH_TOKEN" ]; then composer config github-oauth.github.com ${GH_TOKEN}; fi;
   - cd ./tests
   - composer global require "lionsad/drupal_ti:1.*"
   - drupal-ti before_install
@@ -95,7 +96,6 @@ install:
 
 before_script:
   # We run our script to add module dependencies
-  #- if [ -n "$GH_TOKEN" ]; then composer config github-oauth.github.com ${GH_TOKEN}; fi;
   - drupal-ti --include drupal_ti/before/before_script.sh
   - drupal-ti before_script
   - drupal-ti --include drupal_ti/after/before_script.sh
