@@ -84,6 +84,7 @@ mysql:
   encoding: utf8
 
 before_install:
+  - git config --global github.accesstoken $GH_TOKEN
   - composer self-update
   - cd ./tests
   - composer global require "lionsad/drupal_ti:1.*"
