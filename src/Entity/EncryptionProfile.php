@@ -110,7 +110,7 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
    * {@inheritdoc}
    */
   public function getEncryptionMethod() {
-    if (!isset($this->encryption_method_plugin)) {
+    if (!isset($this->encryption_method_plugin) || $this->encryption_method_plugin->getPluginId() != $this->getEncryptionMethodId()) {
       $this->encryption_method_plugin = $this->getEncryptionMethodManager()->createInstance($this->getEncryptionMethodId());
     }
     return $this->encryption_method_plugin;
@@ -135,7 +135,7 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
    * {@inheritdoc}
    */
   public function getEncryptionKey() {
-    if (!isset($this->encryption_key_entity)) {
+    if (!isset($this->encryption_key_entity) || $this->encryption_key_entity->id() != $this->getEncryptionKeyId()) {
       $this->encryption_key_entity = $this->getKeyRepository()->getKey($this->getEncryptionKeyId());
     }
     return $this->encryption_key_entity;

@@ -137,6 +137,7 @@ class EncryptionProfileForm extends EntityForm {
       '#title' => $this->t('Encryption Key'),
       '#required' => TRUE,
       '#default_value' => $encryption_profile->getEncryptionKeyId(),
+      '#disabled' => $disabled,
     );
 
     if ($current_encryption_method = $encryption_profile->getEncryptionMethodId()) {
@@ -181,6 +182,7 @@ class EncryptionProfileForm extends EntityForm {
       $form_state->setRebuild();
       if ($form_state->getValue('confirm_edit') == TRUE) {
         $this->edit_confirmed = TRUE;
+        return;
       }
     }
 
