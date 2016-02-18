@@ -106,4 +106,22 @@ class EncryptionProfileListBuilder extends ConfigEntityListBuilder {
     return $row + parent::buildRow($entity);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getDefaultOperations(EntityInterface $entity) {
+    /* @var \Drupal\Core\Config\Entity\ConfigEntityInterface $entity */
+    $operations = parent::getDefaultOperations($entity);
+
+    if ($entity->hasLinkTemplate('test-form')) {
+      $operations['test'] = array(
+        'title' => t('Test'),
+        'weight' => 30,
+        'url' => $entity->urlInfo('test-form'),
+      );
+    }
+
+    return $operations;
+  }
+
 }

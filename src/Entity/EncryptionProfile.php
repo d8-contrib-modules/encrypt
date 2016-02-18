@@ -28,6 +28,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
  *       "add" = "Drupal\encrypt\Form\EncryptionProfileForm",
  *       "edit" = "Drupal\encrypt\Form\EncryptionProfileForm",
  *       "delete" = "Drupal\encrypt\Form\EncryptionProfileDeleteForm",
+ *       "test" = "Drupal\encrypt\Form\EncryptionProfileTestForm",
  *       "default" = "Drupal\encrypt\Form\EncryptionProfileDefaultForm"
  *     }
  *   },
@@ -43,6 +44,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
  *     "add-form" = "/admin/config/system/encryption/profiles/add",
  *     "edit-form" = "/admin/config/system/encryption/profiles/manage/{encryption_profile}",
  *     "delete-form" = "/admin/config/system/encryption/profiles/manage/{encryption_profile}/delete",
+ *     "test-form" = "/admin/config/system/encryption/profiles/manage/{encryption_profile}/test",
  *     "collection" = "/admin/config/system/encryption/profiles"
  *   },
  *   config_export = {
