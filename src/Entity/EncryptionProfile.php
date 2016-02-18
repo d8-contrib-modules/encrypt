@@ -14,6 +14,7 @@ use Drupal\encrypt\EncryptionProfileInterface;
 use Drupal\encrypt\Exception\EncryptException;
 use Drupal\encrypt\EncryptionMethodInterface;
 use Drupal\key\Entity\Key;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
  * Defines the EncryptionProfile entity.
@@ -53,6 +54,8 @@ use Drupal\key\Entity\Key;
  * )
  */
 class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInterface {
+  use StringTranslationTrait;
+
   /**
    * The encryption profile ID.
    *
@@ -165,11 +168,11 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
 
     // Check if the object properties are set correctly.
     if (!$this->getEncryptionMethodId()) {
-      $errors[] = t('No encryption method selected.');
+      $errors[] = $this->t('No encryption method selected.');
     }
 
     if (!$this->getEncryptionKeyId()) {
-      $errors[] = t('No encryption key selected.');
+      $errors[] = $this->t('No encryption key selected.');
     }
 
     // If the properties are set, continue validation.
@@ -177,13 +180,13 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
       // Check if the linked encryption method is valid.
       $encryption_method_definition = $this->getEncryptionMethodManager()->getDefinition($this->getEncryptionMethodId());
       if (!$encryption_method_definition) {
-        $errors[] = t('The encryption method linked to this encryption profile does not exist.');
+        $errors[] = $this->t('The encryption method linked to this encryption profile does not exist.');
       }
 
       // Check if the linked encryption key is valid.
       $selected_key = $this->getEncryptionKey();
       if (!$selected_key) {
-        $errors[] = t('The key linked to this encryption profile does not exist.');
+        $errors[] = $this->t('The key linked to this encryption profile does not exist.');
       }
 
       // If the encryption method and key are valid, continue validation.
@@ -193,7 +196,7 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
         if (!empty($allowed_key_types)) {
           $selected_key_type = $selected_key->getKeyType();
           if (!in_array($selected_key_type->getPluginId(), $allowed_key_types)) {
-            $errors[] = t('The selected key cannot be used with the selected encryption method.');
+            $errors[] = $this->t('The selected key cannot be used with the selected encryption method.');
           }
         }
         // Check if encryption method dependencies are met.

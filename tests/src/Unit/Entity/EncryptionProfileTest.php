@@ -6,6 +6,7 @@
 
 namespace Drupal\Tests\encrypt\Unit\Entity;
 
+use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\key\KeyInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\encrypt\EncryptionMethodInterface;
@@ -55,6 +56,10 @@ class EncryptionProfileTest extends UnitTestCase {
    */
   protected function setUp() {
     parent::setUp();
+
+    $container = new ContainerBuilder();
+    $container->set('string_translation', $this->getStringTranslationStub());
+    \Drupal::setContainer($container);
 
     // Mock a Key entity.
     $this->key = $this->getMockBuilder('\Drupal\key\Entity\Key')
