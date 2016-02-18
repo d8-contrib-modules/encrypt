@@ -77,7 +77,7 @@ env:
 
   matrix:
     #- DRUPAL_TI_RUNNERS="phpunit simpletest"
-    - DRUPAL_TI_RUNNERS="simpletest"
+    - DRUPAL_TI_RUNNERS="phpunit-core simpletest"
 
 mysql:
   database: drupal_travis_db
