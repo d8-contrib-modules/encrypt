@@ -162,7 +162,7 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
   /**
    * {@inheritdoc}
    */
-  public function validate() {
+  public function validate($text = NULL) {
     $random = new Random();
     $errors = [];
 
@@ -201,7 +201,10 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
         }
         // Check if encryption method dependencies are met.
         $encryption_method = $this->getEncryptionMethod();
-        $dependency_errors = $encryption_method->checkDependencies($random->string(), $selected_key->getKeyValue());
+        if (!$text) {
+          $text = $random->string();
+        }
+        $dependency_errors = $encryption_method->checkDependencies($text, $selected_key->getKeyValue());
         $errors = array_merge($errors, $dependency_errors);
       }
     }

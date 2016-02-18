@@ -32,14 +32,6 @@ class EncryptService implements EncryptServiceInterface {
   protected $keyRepository;
 
   /**
-   * The encryption method to use.
-   *
-   * @var \Drupal\encrypt\EncryptionMethodInterface
-   */
-  protected $encryptionMethod;
-
-
-  /**
    * {@inheritdoc}
    *
    * @param \Drupal\encrypt\EncryptionMethodManager $encrypt_manager
@@ -63,79 +55,43 @@ class EncryptService implements EncryptServiceInterface {
    * {@inheritdoc}
    */
   public function encrypt($text, EncryptionProfile $encryption_profile) {
-    // Get the key and check dependencies.
-    $key_value = $this->getEncryptionKeyValue($text, $encryption_profile);
-    // Return the encrypted value.
-    return $this->getEncryptionMethod()->encrypt($text, $key_value);
+    if ($this->valid($text, $encryption_profile)) {
+      $key = $encryption_profile->getEncryptionKey();
+      return $encryption_profile->getEncryptionMethod()->encrypt($text, $key->getKeyValue());
+    }
   }
 
   /**
    * {@inheritdoc}
    */
   public function decrypt($text, EncryptionProfile $encryption_profile) {
-    // Get the key and check dependencies.
-    $key_value = $this->getEncryptionKeyValue($text, $encryption_profile);
-    // Return the encrypted value.
-    return $this->getEncryptionMethod()->decrypt($text, $key_value);
+    if ($this->valid($text, $encryption_profile)) {
+      $key = $encryption_profile->getEncryptionKey();
+      return $encryption_profile->getEncryptionMethod()->decrypt($text, $key->getKeyValue());
+    }
   }
 
   /**
-   * Get the used encryption method.
+   * Determines whether the input is valid for encryption / decryption.
    *
-   * @return \Drupal\encrypt\EncryptionMethodInterface
-   *   The used encryption method.
-   *
-   * @codeCoverageIgnore
-   */
-  protected function getEncryptionMethod() {
-    return $this->encryptionMethod;
-  }
-
-  /**
-   * Get the used encryption key.
-   *
-   * @param string $text
+   * @param $text
    *   The text to encrypt / decrypt.
    * @param \Drupal\encrypt\Entity\EncryptionProfile $encryption_profile
-   *   The encryption profile to use.
+   *   The encryption profile to validate.
    *
-   * @return string
-   *   The encryption key value.
+   * @return bool
+   *   Whether the encryption profile validated correctly.
    *
    * @throws \Drupal\encrypt\Exception\EncryptException
-   *   Can throw an EncryptException.
+   *   Error with validation failures.
    */
-  protected function getEncryptionKeyValue($text, EncryptionProfile $encryption_profile) {
-    // Load the encryption method.
-    $this->encryptionMethod = $encryption_profile->getEncryptionMethod();
-
-    // Load the encryption key.
-    $key_value = $this->loadEncryptionProfileKey($encryption_profile);
-
-    // Check for missing dependencies.
-    $errors = $this->encryptionMethod->checkDependencies($text, $key_value);
-
+  protected function valid($text, EncryptionProfile $encryption_profile) {
+    $errors = $encryption_profile->validate($text);
     if (!empty($errors)) {
       // Throw an exception with the errors from the encryption method.
       throw new EncryptException(implode('; ', $errors));
     }
-    else {
-      return $key_value;
-    }
-  }
-
-  /**
-   * Loads an encryption profile key.
-   *
-   * @param \Drupal\encrypt\Entity\EncryptionProfile $encryption_profile
-   *   The encryption profile to use.
-   *
-   * @return string
-   *   The encryption key value.
-   */
-  protected function loadEncryptionProfileKey(EncryptionProfile $encryption_profile) {
-    $key = $encryption_profile->getEncryptionKey();
-    return $key->getKeyValue();
+    return TRUE;
   }
 
 }
