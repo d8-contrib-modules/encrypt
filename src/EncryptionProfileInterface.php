@@ -65,9 +65,12 @@ interface EncryptionProfileInterface extends ConfigEntityInterface {
   /**
    * Validate the EncryptionProfile entity.
    *
+   * @param string $text
+   *   The text to be encrypted / decrypted.
+   *
    * @return array
    *   An array of validation errors. Empty if no errors.
    */
-  public function validate();
+  public function validate($text = NULL);
 
 }
