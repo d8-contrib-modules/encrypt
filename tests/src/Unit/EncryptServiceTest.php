@@ -120,7 +120,7 @@ class EncryptServiceTest extends UnitTestCase {
    * @covers ::__construct
    * @covers ::encrypt
    * @covers ::decrypt
-   * @covers ::valid
+   * @covers ::validate
    *
    * @dataProvider encryptionDataProvider
    */

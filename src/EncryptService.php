@@ -55,7 +55,7 @@ class EncryptService implements EncryptServiceInterface {
    * {@inheritdoc}
    */
   public function encrypt($text, EncryptionProfile $encryption_profile) {
-    if ($this->valid($text, $encryption_profile)) {
+    if ($this->validate($text, $encryption_profile)) {
       $key = $encryption_profile->getEncryptionKey();
       return $encryption_profile->getEncryptionMethod()->encrypt($text, $key->getKeyValue());
     }
@@ -65,7 +65,7 @@ class EncryptService implements EncryptServiceInterface {
    * {@inheritdoc}
    */
   public function decrypt($text, EncryptionProfile $encryption_profile) {
-    if ($this->valid($text, $encryption_profile)) {
+    if ($this->validate($text, $encryption_profile)) {
       $key = $encryption_profile->getEncryptionKey();
       return $encryption_profile->getEncryptionMethod()->decrypt($text, $key->getKeyValue());
     }
@@ -85,7 +85,7 @@ class EncryptService implements EncryptServiceInterface {
    * @throws \Drupal\encrypt\Exception\EncryptException
    *   Error with validation failures.
    */
-  protected function valid($text, EncryptionProfile $encryption_profile) {
+  protected function validate($text, EncryptionProfile $encryption_profile) {
     $errors = $encryption_profile->validate($text);
     if (!empty($errors)) {
       // Throw an exception with the errors from the encryption method.
