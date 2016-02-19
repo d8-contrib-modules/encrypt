@@ -123,7 +123,7 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
    *   The EncryptionMethod's plugin collection.
    */
   protected function getPluginCollection() {
-    if (!$this->pluginCollection) {
+    if (!$this->pluginCollection && $this->encryption_method) {
       $this->pluginCollection = new EncryptionMethodPluginCollection(\Drupal::service('plugin.manager.encrypt.encryption_methods'), $this->encryption_method, $this->encryption_method_configuration);
     }
     return $this->pluginCollection;
