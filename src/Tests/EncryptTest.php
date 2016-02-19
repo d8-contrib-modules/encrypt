@@ -42,7 +42,7 @@ class EncryptTest extends WebTestBase {
 
 
   /**
-   * A list of testkeys
+   * A list of testkeys.
    *
    * @var \Drupal\key\Entity\Key[]
    */
