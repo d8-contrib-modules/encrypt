@@ -30,6 +30,14 @@ entity.encryption_profile.delete_form:
   requirements:
     _permission: 'administer encrypt'
 
+entity.encryption_profile.test_form:
+  path: '/admin/config/system/encryption/profiles/manage/{encryption_profile}/test'
+  defaults:
+    _entity_form: 'encryption_profile.test'
+    _title: 'Test encryption profile'
+  requirements:
+    _permission: 'administer encrypt'
+
 encrypt.settings:
   path: '/admin/config/system/encryption/profiles/settings'
   defaults:
