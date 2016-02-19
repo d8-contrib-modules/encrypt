@@ -9,12 +9,14 @@ namespace Drupal\encrypt\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Component\Utility\Random;
 use Drupal\encrypt\EncryptionProfileInterface;
 use Drupal\encrypt\Exception\EncryptException;
 use Drupal\encrypt\EncryptionMethodInterface;
+use Drupal\encrypt\EncryptionMethodPluginCollection;
 use Drupal\key\Entity\Key;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
  * Defines the EncryptionProfile entity.
@@ -55,7 +57,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
  *   }
  * )
  */
-class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInterface {
+class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInterface, EntityWithPluginCollectionInterface {
   use StringTranslationTrait;
 
   /**
@@ -80,11 +82,18 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
   protected $encryption_method;
 
   /**
-   * Stores a reference to the EncryptionMethod plugin for this profile.
+   * The plugin collection that holds the EncryptionMethod plugin.
    *
-   * @var \Drupal\encrypt\EncryptionMethodInterface
+   * @var \Drupal\encrypt\EncryptionMethodPluginCollection
    */
-  protected $encryption_method_plugin;
+  protected $pluginCollection;
+
+  /**
+   * The configuration of the encryption method.
+   *
+   * @var array
+   */
+  protected $encryption_method_configuration = array();
 
   /**
    * The ID of Key entity.
@@ -103,6 +112,28 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
   /**
    * {@inheritdoc}
    */
+  public function getPluginCollections() {
+    return [
+      'encryption_method_configuration' => $this->getPluginCollection(),
+    ];
+  }
+
+  /**
+   * Encapsulates the creation of the EncryptionMethod's LazyPluginCollection.
+   *
+   * @return \Drupal\Component\Plugin\LazyPluginCollection
+   *   The EncryptionMethod's plugin collection.
+   */
+  protected function getPluginCollection() {
+    if (!$this->pluginCollection) {
+      $this->pluginCollection = new EncryptionMethodPluginCollection(\Drupal::service('plugin.manager.encrypt.encryption_methods'), $this->encryption_method, $this->encryption_method_configuration);
+    }
+    return $this->pluginCollection;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function preSave(EntityStorageInterface $storage) {
     parent::preSave($storage);
     $errors = $this->validate();
@@ -115,10 +146,7 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
    * {@inheritdoc}
    */
   public function getEncryptionMethod() {
-    if (!isset($this->encryption_method_plugin) || $this->encryption_method_plugin->getPluginId() != $this->getEncryptionMethodId()) {
-      $this->encryption_method_plugin = $this->getEncryptionMethodManager()->createInstance($this->getEncryptionMethodId());
-    }
-    return $this->encryption_method_plugin;
+    return $this->getPluginCollection()->get($this->getEncryptionMethodId());
   }
 
   /**
@@ -132,7 +160,7 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
    * {@inheritdoc}
    */
   public function setEncryptionMethod(EncryptionMethodInterface $encryption_method) {
-    $this->encryption_method_plugin = $encryption_method;
+    $this->getPluginCollection()->set($encryption_method->getPluginId(), $encryption_method);
     $this->encryption_method = $encryption_method->getPluginId();
   }
 
@@ -180,8 +208,8 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
     // If the properties are set, continue validation.
     if ($this->getEncryptionMethodId() && $this->getEncryptionKeyId()) {
       // Check if the linked encryption method is valid.
-      $encryption_method_definition = $this->getEncryptionMethodManager()->getDefinition($this->getEncryptionMethodId());
-      if (!$encryption_method_definition) {
+      $encryption_method = $this->getEncryptionMethod();
+      if (!$encryption_method) {
         $errors[] = $this->t('The encryption method linked to this encryption profile does not exist.');
       }
 
@@ -194,7 +222,7 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
       // If the encryption method and key are valid, continue validation.
       if (empty($errors)) {
         // Check if the selected key type matches encryption method settings.
-        $allowed_key_types = $encryption_method_definition['key_type'];
+        $allowed_key_types = $encryption_method->getPluginDefinition()['key_type'];
         if (!empty($allowed_key_types)) {
           $selected_key_type = $selected_key->getKeyType();
           if (!in_array($selected_key_type->getPluginId(), $allowed_key_types)) {
@@ -212,16 +240,6 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
     }
 
     return $errors;
-  }
-
-  /**
-   * Gets the encryption method manager.
-   *
-   * @return \Drupal\encrypt\EncryptionMethodManager
-   *   The EncryptionMethodManager.
-   */
-  protected function getEncryptionMethodManager() {
-    return \Drupal::service('plugin.manager.encrypt.encryption_methods');
   }
 
   /**
