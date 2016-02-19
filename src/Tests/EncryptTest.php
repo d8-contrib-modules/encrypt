@@ -42,11 +42,11 @@ class EncryptTest extends WebTestBase {
 
 
   /**
-   * A test key.
+   * A list of testkeys
    *
-   * @var \Drupal\key\Entity\Key
+   * @var \Drupal\key\Entity\Key[]
    */
-  protected $testKey;
+  protected $testKeys;
 
   /**
    * {@inheritdoc}
@@ -60,13 +60,14 @@ class EncryptTest extends WebTestBase {
       'administer keys',
     ]);
     $this->drupalLogin($this->adminUser);
-    $this->createTestKey();
+    $this->createTestKeys();
   }
 
   /**
    * Creates a test key for usage in the tests.
    */
-  protected function createTestKey() {
+  protected function createTestKeys() {
+    // Create a 128bit testkey.
     $this->drupalGet('admin/config/system/keys/add');
     $edit = [
       'key_type' => 'encryption',
@@ -78,8 +79,8 @@ class EncryptTest extends WebTestBase {
     $this->drupalPostAjaxForm(NULL, $edit, 'key_provider');
 
     $edit = [
-      'id' => 'testing_key',
-      'label' => 'Testing Key',
+      'id' => 'testing_key_128',
+      'label' => 'Testing Key 128 bit',
       'key_type' => "encryption",
       'key_type_settings[key_size]' => '128',
       'key_provider' => 'config',
@@ -87,8 +88,32 @@ class EncryptTest extends WebTestBase {
     ];
     $this->drupalPostForm(NULL, $edit, t('Save'));
 
-    $this->testKey = \Drupal::service('key.repository')->getKey('testing_key');
-    $this->assertTrue($this->testKey, 'Key was succesfully saved.');
+    $this->testKeys['testing_key_128'] = \Drupal::service('key.repository')->getKey('testing_key_128');
+    $this->assertTrue($this->testKeys['testing_key_128'], 'Key was succesfully saved.');
+
+    // Create a 256bit testkey.
+    $this->drupalGet('admin/config/system/keys/add');
+    $edit = [
+      'key_type' => 'encryption',
+    ];
+    $this->drupalPostAjaxForm(NULL, $edit, 'key_type');
+    $edit = [
+      'key_provider' => 'config',
+    ];
+    $this->drupalPostAjaxForm(NULL, $edit, 'key_provider');
+
+    $edit = [
+      'id' => 'testing_key_256',
+      'label' => 'Testing Key 256 bit',
+      'key_type' => "encryption",
+      'key_type_settings[key_size]' => '256',
+      'key_provider' => 'config',
+      'key_input_settings[key_value]' => 'mustbesixteenbitmustbesixteenbit',
+    ];
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+
+    $this->testKeys['testing_key_256'] = \Drupal::service('key.repository')->getKey('testing_key_256');
+    $this->assertTrue($this->testKeys['testing_key_256'], 'Key was succesfully saved.');
   }
 
   /**
@@ -111,9 +136,9 @@ class EncryptTest extends WebTestBase {
       'id' => 'test_encryption_profile',
       'label' => 'Test encryption profile',
       'encryption_method' => 'test_encryption_method',
-      'encryption_key' => $this->testKey->id(),
+      'encryption_key' => $this->testKeys['testing_key_128']->id(),
     ];
-    $this->drupalPostForm('admin/config/system/encryption/profiles/add', $edit, t('Save'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
 
     $encryption_profile = \Drupal::service('entity.manager')->getStorage('encryption_profile')->load('test_encryption_profile');
     $this->assertTrue($encryption_profile, 'Encryption profile was succesfully saved.');
@@ -148,12 +173,12 @@ class EncryptTest extends WebTestBase {
       'id' => 'test_encryption_profile',
       'label' => 'Test encryption profile',
       'encryption_method' => 'test_encryption_method',
-      'encryption_key' => 'testing_key',
+      'encryption_key' => $this->testKeys['testing_key_128']->id(),
     ];
-    $this->drupalPostForm('admin/config/system/encryption/profiles/add', $edit, t('Save'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
 
     // Now delete the testkey.
-    $this->testKey->delete();
+    $this->testKeys['testing_key_128']->delete();
 
     // Check if the error message is shown.
     $this->drupalGet('admin/config/system/encryption/profiles');
@@ -165,6 +190,25 @@ class EncryptTest extends WebTestBase {
       ->save();
     $this->drupalGet('admin/config/system/encryption/profiles');
     $this->assertNoText('The key linked to this encryption profile does not exist.');
+
+    // Test the encryption profile edit form.
+    $this->drupalGet('admin/config/system/encryption/profiles/manage/test_encryption_profile');
+    $this->assertFieldByName('confirm_edit', NULL, 'Edit confirmation checkbox found');
+    $enc_method_disabled = $this->xpath('//select[@name="encryption_method" and @disabled="disabled"]');
+    $this->assertTrue(count($enc_method_disabled) === 1, 'The encryption method select is disabled.');
+    $enc_key_disabled = $this->xpath('//select[@name="encryption_key" and @disabled="disabled"]');
+    $this->assertTrue(count($enc_key_disabled) === 1, 'The encryption key select is disabled.');
+
+    // Check the edit confirmation checkbox.
+    $edit = [
+      'confirm_edit' => 1,
+    ];
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->assertNoFieldByName('confirm_edit', NULL, 'Confirmation checkbox is gone.');
+    $enc_method_disabled = $this->xpath('//select[@name="encryption_method" and @disabled="disabled"]');
+    $this->assertTrue(count($enc_method_disabled) === 0, 'The encryption method select is no longer disabled.');
+    $enc_key_disabled = $this->xpath('//select[@name="encryption_key" and @disabled="disabled"]');
+    $this->assertTrue(count($enc_key_disabled) === 0, 'The encryption key select is no longer disabled.');
   }
 
 }
