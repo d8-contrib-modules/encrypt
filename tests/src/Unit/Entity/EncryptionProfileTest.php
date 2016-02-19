@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Contains Drupal\Tests\encrypt\Unit\Entity\EncryptionProfileTest.
@@ -38,18 +39,18 @@ class EncryptionProfileTest extends UnitTestCase {
   protected $encryptionMethod;
 
   /**
-   * A mocked EncryptionMethodManager.
-   *
-   * @var \Drupal\encrypt\EncryptionMethodManager|\PHPUnit_Framework_MockObject_MockObject
-   */
-  protected $encryptionMethodManager;
-
-  /**
    * A mocked KeyRepository.
    *
    * @var \Drupal\key\KeyRepository|\PHPUnit_Framework_MockObject_MockObject
    */
   protected $keyRepository;
+
+  /**
+   * A mocked plugin collection.
+   *
+   * @var \Drupal\Core\Plugin\DefaultLazyPluginCollection|\PHPUnit_Framework_MockObject_MockObject
+   */
+  protected $pluginCollection;
 
   /**
    * {@inheritdoc}
@@ -90,14 +91,15 @@ class EncryptionProfileTest extends UnitTestCase {
       ->method('checkDependencies')
       ->will($this->returnValue(array()));
 
-    // Mock an EncryptionMethodManager.
-    $this->encryptionMethodManager = $this->getMockBuilder('\Drupal\encrypt\EncryptionMethodManager')
-      ->disableOriginalConstructor()
-      ->getMock();
-
     // Mock a KeyRepository.
     $this->keyRepository = $this->getMockBuilder('\Drupal\key\KeyRepository')
       ->disableOriginalConstructor()
+      ->getMock();
+
+    // Mock a plugin collection.
+    $this->pluginCollection = $this->getMockBuilder('\Drupal\Core\Plugin\DefaultLazyPluginCollection')
+      ->disableOriginalConstructor()
+      ->setMethods(array('get', 'set'))
       ->getMock();
   }
 
@@ -117,16 +119,14 @@ class EncryptionProfileTest extends UnitTestCase {
         'getEncryptionMethodId',
         'getEncryptionKey',
         'getEncryptionKeyId',
-        'getEncryptionMethodManager',
       ]
       )
       ->disableOriginalConstructor()
       ->getMock();
 
-    // Set expectations for EncryptionMethodManager.
-    $this->encryptionMethodManager->expects($this->any())
-      ->method('getDefinition')
-      ->with($this->equalTo('test_encryption_method'))
+    // Set expectations for the EncryptionMethod.
+    $this->encryptionMethod->expects($this->any())
+      ->method('getPluginDefinition')
       ->will($this->returnValue($enc_method_def));
 
     // Set expectations for EncryptionProfile entity.
@@ -136,9 +136,16 @@ class EncryptionProfileTest extends UnitTestCase {
     $encryption_profile->expects($this->any())
       ->method('getEncryptionKeyId')
       ->will($this->returnValue($enc_key));
-    $encryption_profile->expects($this->any())
-      ->method('getEncryptionMethod')
-      ->will($this->returnValue($this->encryptionMethod));
+    if ($enc_method_id == "test_encryption_method") {
+      $encryption_profile->expects($this->any())
+        ->method('getEncryptionMethod')
+        ->will($this->returnValue($this->encryptionMethod));
+    }
+    else {
+      $encryption_profile->expects($this->any())
+        ->method('getEncryptionMethod')
+        ->will($this->returnValue(FALSE));
+    }
     if ($enc_key == "test_key") {
       $encryption_profile->expects($this->any())
         ->method('getEncryptionKey')
@@ -149,10 +156,6 @@ class EncryptionProfileTest extends UnitTestCase {
         ->method('getEncryptionKey')
         ->will($this->returnValue(FALSE));
     }
-
-    $encryption_profile->expects($this->any())
-      ->method('getEncryptionMethodManager')
-      ->will($this->returnValue($this->encryptionMethodManager));
 
     $errors = $encryption_profile->validate();
     $this->assertEquals($expected_errors, $errors);
@@ -179,7 +182,7 @@ class EncryptionProfileTest extends UnitTestCase {
         ['No encryption method selected.', 'No encryption key selected.'],
       ],
       'invalid_encryption_method' => [
-        'test_encryption_method',
+        'invalid_encryption_method',
         'test_key',
         NULL,
         ['The encryption method linked to this encryption profile does not exist.'],
@@ -214,22 +217,23 @@ class EncryptionProfileTest extends UnitTestCase {
     // Set up a mock for the EncryptionProfile class to mock some methods.
     $encryption_profile = $this->getMockBuilder('\Drupal\encrypt\Entity\EncryptionProfile')
       ->setMethods([
-        'getEncryptionMethodManager',
+        'getPluginCollection',
         'getEncryptionMethodId',
       ]
       )
       ->disableOriginalConstructor()
       ->getMock();
 
-    $this->encryptionMethodManager->expects($this->any())
-      ->method('createInstance')
-      ->with($this->equalTo('test_encryption_method'))
+    // Set up expectations for plugin collection.
+    $this->pluginCollection->expects($this->atLeastOnce())
+      ->method('get')
+      ->with('test_encryption_method')
       ->will($this->returnValue($this->encryptionMethod));
 
+    // Set up expectations for encryption profile.
     $encryption_profile->expects($this->any())
-      ->method('getEncryptionMethodManager')
-      ->will($this->returnValue($this->encryptionMethodManager));
-
+      ->method('getPluginCollection')
+      ->will($this->returnValue($this->pluginCollection));
     $encryption_profile->expects($this->any())
       ->method('getEncryptionMethodId')
       ->will($this->returnValue('test_encryption_method'));
@@ -244,7 +248,23 @@ class EncryptionProfileTest extends UnitTestCase {
    * @covers ::setEncryptionMethod
    */
   public function testSetEncryptionMethod() {
-    $encryption_profile = new EncryptionProfile([], 'encryption_profile');
+    // Set up a mock for the EncryptionProfile class to mock some methods.
+    $encryption_profile = $this->getMockBuilder('\Drupal\encrypt\Entity\EncryptionProfile')
+      ->setMethods([
+        'getPluginCollection',
+        'getEncryptionMethodId',
+      ]
+      )
+      ->disableOriginalConstructor()
+      ->getMock();
+
+    $this->pluginCollection->expects($this->once())
+      ->method('set');
+
+    // Set up expectations for encryption profile.
+    $encryption_profile->expects($this->any())
+      ->method('getPluginCollection')
+      ->will($this->returnValue($this->pluginCollection));
 
     // Set up expectations for encryption method.
     $this->encryptionMethod->expects($this->any())
@@ -252,7 +272,6 @@ class EncryptionProfileTest extends UnitTestCase {
       ->will($this->returnValue('test_encryption_method'));
 
     $encryption_profile->setEncryptionMethod($this->encryptionMethod);
-    $this->assertEquals("test_encryption_method", $encryption_profile->getEncryptionMethodId());
   }
 
   /**
