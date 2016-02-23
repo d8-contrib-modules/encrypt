@@ -24,4 +24,15 @@ class EncryptionMethodPluginCollection extends DefaultSingleLazyPluginCollection
     return parent::get($instance_id);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function addInstanceId($id, $configuration = NULL) {
+    $this->instanceId = $id;
+    parent::addInstanceId($id, $configuration);
+    if ($configuration !== NULL) {
+      $this->setConfiguration($configuration);
+    }
+  }
+
 }

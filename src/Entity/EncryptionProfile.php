@@ -54,6 +54,7 @@ use Drupal\key\Entity\Key;
  *     "label",
  *     "encryption_method",
  *     "encryption_key",
+ *     "encryption_method_configuration",
  *   }
  * )
  */
@@ -146,7 +147,9 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
    * {@inheritdoc}
    */
   public function getEncryptionMethod() {
-    return $this->getPluginCollection()->get($this->getEncryptionMethodId());
+    if ($this->getEncryptionMethodId()) {
+      return $this->getPluginCollection()->get($this->getEncryptionMethodId());
+    }
   }
 
   /**
@@ -160,8 +163,8 @@ class EncryptionProfile extends ConfigEntityBase implements EncryptionProfileInt
    * {@inheritdoc}
    */
   public function setEncryptionMethod(EncryptionMethodInterface $encryption_method) {
-    $this->getPluginCollection()->set($encryption_method->getPluginId(), $encryption_method);
     $this->encryption_method = $encryption_method->getPluginId();
+    $this->getPluginCollection()->addInstanceID($encryption_method->getPluginId());
   }
 
   /**
