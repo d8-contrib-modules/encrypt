@@ -1,5 +1,5 @@
 encrypt.settings:
-  type: mapping
+  type: config_object
   label: 'Encrypt Settings'
   mapping:
     check_profile_status:
