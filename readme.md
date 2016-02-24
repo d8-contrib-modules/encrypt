@@ -1,23 +1,27 @@
 # Encrypt Module for Drupal 8
 
-This module provides a global encryption service that can be invoked via the services interface.
+This module provides a global encryption service that can be invoked via the 
+services interface.
 
 ## Architecture
 
-Encrypt leverages the Drupal 8 Plugin API for Encryption Methods. It also leverages the Key module for maintenance of
-encryption Keys. 
+Encrypt leverages the Drupal 8 Plugin API for Encryption Methods. It also 
+leverages the Key module for maintenance of encryption Keys. 
 
 Plugins allow for extensibility for customized needs. 
 
 ## Settings
 
-The service is configured through the settings form, found at `/admin/config/system/encryption`.
+The service is configured through the settings form, found at 
+`/admin/config/system/encryption`.
 
-It requires a key, which is provided by the Key module. To manage keys, visit `admin/config/system/key`.
+It requires a key, which is provided by the Key module. To manage keys, visit 
+`admin/config/system/key`.
 
 ## Use of Services
 
-After configuring the service, the service provides the ability to encrypt and decrypt using your encryption profile (machine name).
+After configuring the service, the service provides the ability to encrypt and 
+decrypt using your encryption profile (machine name).
 
 ### Encrypt
 ```
@@ -40,3 +44,16 @@ use the following code to retrieve the encryption profile:
 ```
 $encryption_profile = \Drupal::service('entity.manager')->getStorage('encryption_profile')->load($instance_id);
 ```
+
+## Writing your own EncryptionMethod plugin
+
+In you want to write your own encryption method plugin, you should extend the
+EncryptionMethodBase class and implement the methods defined by the 
+EncryptionMethodInterface. See the TestEncryptionMethod class in the 
+encrypt_test module bundled in the "tests" directory of this module.
+
+Optionally, your encryption method plugin can provide a configuration form, that
+will automatically be shown upon creation of an EncryptionProfile entity.
+In this case you'll also need to implement EncryptionMethodPluginFormInterface
+and create its required methods. See the ConfigTestEncryptionMethod class in the
+encrypt_test module for a simple example.
