@@ -211,4 +211,78 @@ class EncryptTest extends WebTestBase {
     $this->assertTrue(count($enc_key_disabled) === 0, 'The encryption key select is no longer disabled.');
   }
 
+  /**
+   * Test Encryption profile entity with encryption method plugin config forms.
+   */
+  public function testEncryptionMethodConfig() {
+    // Create an encryption profile config entity.
+    $this->drupalGet('admin/config/system/encryption/profiles/add');
+
+    // Check if the plugin exists.
+    $this->assertOption('edit-encryption-method', 'config_test_encryption_method', t('Config encryption method option is present'));
+    $this->assertText('Config Test Encryption method', t('Config encryption method text is present'));
+
+    // Check encryption method without config.
+    $edit = [
+      'encryption_method' => 'test_encryption_method',
+    ];
+    $this->drupalPostAjaxForm(NULL, $edit, 'encryption_method');
+    $this->assertNoFieldByName('encryption_method_configuration[mode]', NULL, 'Test encryption method has no config form');
+
+    // Check encryption method with config.
+    $edit = [
+      'encryption_method' => 'config_test_encryption_method',
+    ];
+    $this->drupalPostAjaxForm(NULL, $edit, 'encryption_method');
+    $this->assertFieldByName('encryption_method_configuration[mode]', NULL, 'Config test encryption method has config form');
+    $this->assertOptionWithDrupalSelector('edit-encryption-method-configuration-mode', 'CBC', 'Config form shows element');
+
+    // Save encryption profile with configured encryption method.
+    $edit = [
+      'id' => 'test_config_encryption_profile',
+      'label' => 'Test encryption profile',
+      'encryption_method' => 'config_test_encryption_method',
+      'encryption_method_configuration[mode]' => 'CFB',
+      'encryption_key' => $this->testKeys['testing_key_128']->id(),
+    ];
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+
+    // Check if encryption method configuration was succesfully saved.
+    $encryption_profile = \Drupal::service('entity.manager')->getStorage('encryption_profile')->load('test_config_encryption_profile');
+    $this->assertTrue($encryption_profile, 'Encryption profile was succesfully saved');
+    $encryption_method = $encryption_profile->getEncryptionMethod();
+    $encryption_method_config = $encryption_method->getConfiguration();
+    $this->assertEqual(['mode' => 'CFB'], $encryption_method_config, 'Encryption method config correctly saved');
+
+    // Change the encryption method to a non-config one.
+    $this->drupalGet('admin/config/system/encryption/profiles/manage/test_config_encryption_profile');
+
+    // First, confirm we want to edit the encryption profile.
+    $edit = [
+      'confirm_edit' => 1,
+    ];
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+
+    // Select encryption method without config.
+    $edit = [
+      'encryption_method' => 'test_encryption_method',
+    ];
+    $this->drupalPostAjaxForm(NULL, $edit, 'encryption_method');
+    $this->assertNoFieldByName('encryption_method_configuration[mode]', NULL, 'Test encryption method has no config form');
+
+    // Save encryption profile with simple encryption method.
+    $edit = [
+      'encryption_method' => 'test_encryption_method',
+      'encryption_key' => $this->testKeys['testing_key_128']->id(),
+    ];
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+
+    // Check if encryption method configuration was succesfully updated.
+    $encryption_profile = \Drupal::service('entity.manager')->getStorage('encryption_profile')->load('test_config_encryption_profile');
+    $this->assertTrue($encryption_profile, 'Encryption profile was succesfully loaded');
+    $encryption_method = $encryption_profile->getEncryptionMethod();
+    $encryption_method_config = $encryption_method->getConfiguration();
+    $this->assertEqual([], $encryption_method_config, 'Encryption method config correctly saved');
+  }
+
 }
