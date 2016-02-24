@@ -99,7 +99,7 @@ class EncryptionProfileTest extends UnitTestCase {
     // Mock a plugin collection.
     $this->pluginCollection = $this->getMockBuilder('\Drupal\Core\Plugin\DefaultLazyPluginCollection')
       ->disableOriginalConstructor()
-      ->setMethods(array('get', 'set'))
+      ->setMethods(array('get', 'set', 'addInstanceID'))
       ->getMock();
   }
 
@@ -250,16 +250,12 @@ class EncryptionProfileTest extends UnitTestCase {
   public function testSetEncryptionMethod() {
     // Set up a mock for the EncryptionProfile class to mock some methods.
     $encryption_profile = $this->getMockBuilder('\Drupal\encrypt\Entity\EncryptionProfile')
-      ->setMethods([
-        'getPluginCollection',
-        'getEncryptionMethodId',
-      ]
-      )
+      ->setMethods(['getPluginCollection'])
       ->disableOriginalConstructor()
       ->getMock();
 
     $this->pluginCollection->expects($this->once())
-      ->method('set');
+      ->method('addInstanceID');
 
     // Set up expectations for encryption profile.
     $encryption_profile->expects($this->any())
