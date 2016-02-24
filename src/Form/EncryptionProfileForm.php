@@ -155,7 +155,7 @@ class EncryptionProfileForm extends EntityForm {
       '#description' => $this->t('Select the method used for encryption'),
       '#options' => $method_options,
       '#required' => TRUE,
-      '#default_value' => $encryption_profile->getEncryptionMethod()->getPluginId(),
+      '#default_value' => $encryption_profile->getEncryptionMethodId(),
       '#ajax' => array(
         'callback' => [$this, 'ajaxUpdateSettings'],
         'event' => 'change',
