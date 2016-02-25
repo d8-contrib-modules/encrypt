@@ -34,6 +34,20 @@ class EncryptionProfileManager implements EncryptionProfileManagerInterface {
   /**
    * {@inheritdoc}
    */
+  public function getEncryptionProfile($encryption_profile_id) {
+    return $this->entityManager->getStorage('encryption_profile')->load($encryption_profile_id);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getAllEncryptionProfiles() {
+    return $this->entityManager->getStorage('encryption_profile')->loadMultiple();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getEncryptionProfilesByEncryptionMethod($encryption_method_id) {
     return $this->entityManager->getStorage('encryption_profile')->loadByProperties(array('encryption_method' => $encryption_method_id));
   }
@@ -43,6 +57,22 @@ class EncryptionProfileManager implements EncryptionProfileManagerInterface {
    */
   public function getEncryptionProfilesByEncryptionKey($key_id) {
     return $this->entityManager->getStorage('encryption_profile')->loadByProperties(array('encryption_key' => $key_id));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getEncryptionProfileNamesAsOptions() {
+    $options = array();
+    $encryption_profiles = $this->getAllEncryptionProfiles();
+
+    if ($encryption_profiles) {
+      foreach ($encryption_profiles as $encryption_profile) {
+        $options[$encryption_profile->id()] = $encryption_profile->label();
+      }
+    }
+
+    return $options;
   }
 
 }
