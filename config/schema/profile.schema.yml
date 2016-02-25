@@ -13,6 +13,16 @@ encrypt.profile.*:
     encryption_method:
       type: string
       label: 'Encryption method selected for encryption profile'
+    encryption_method_configuration:
+      type: encryption_method.config.[%parent.encryption_method]
+      label: 'Encryption method configuration'
     encryption_key:
       type: string
       label: 'Key ID for encryption profile'
+
+
+encryption_method.config.*:
+  type: sequence
+  label: 'Encryption method config'
+  sequence:
+    - type: string

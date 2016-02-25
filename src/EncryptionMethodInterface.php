@@ -6,14 +6,16 @@
 
 namespace Drupal\encrypt;
 
+use Drupal\Component\Plugin\ConfigurablePluginInterface;
 use Drupal\Component\Plugin\PluginInspectionInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 
 /**
  * Provides an interface for EncryptionMethod plugins.
  *
  * @package Drupal\encrypt
  */
-interface EncryptionMethodInterface extends PluginInspectionInterface {
+interface EncryptionMethodInterface extends ContainerFactoryPluginInterface, PluginInspectionInterface, ConfigurablePluginInterface {
 
   /**
    * Encrypt text.
