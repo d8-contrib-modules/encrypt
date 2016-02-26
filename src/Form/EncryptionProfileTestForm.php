@@ -13,7 +13,7 @@ use Drupal\encrypt\EncryptService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class EncryptionProfileTestForm.
+ * Provides a form for testing encryption / decryption on a given profile.
  */
 class EncryptionProfileTestForm extends EntityForm {
 

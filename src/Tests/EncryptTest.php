@@ -17,16 +17,6 @@ use Drupal\simpletest\WebTestBase;
 class EncryptTest extends WebTestBase {
 
   /**
-   * Exempt from strict schema checking.
-   *
-   * @see \Drupal\Core\Config\Testing\ConfigSchemaChecker
-   *
-   * @var bool
-   */
-  // @TODO: remove if https://www.drupal.org/node/2666196 is fixed.
-  protected $strictConfigSchema = FALSE;
-
-  /**
    * Modules to enable for this test.
    *
    * @var string[]

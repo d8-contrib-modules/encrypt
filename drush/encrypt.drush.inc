@@ -6,18 +6,19 @@
  */
 
 use Drupal\encrypt\Entity\EncryptionProfile;
-use Drush\Log\Logger;
 use Drush\Log\LogLevel;
 
 /**
- * Implementation of hook_drush_help().
+ * Implements hook_drush_help().
  */
 function encrypt_drush_help($section) {
   switch ($section) {
     case 'meta:encrypt:title':
       return dt('Encrypt commands');
+
     case 'meta:encrypt:summary':
       return dt('Interact with the encryption service.');
+
   }
 }
 
@@ -137,7 +138,11 @@ function drush_encrypt_decrypt($encryption_profile_name, $text) {
 /**
  * Validates the given encryption profile.
  *
- * @param $encryption_profile_name
+ * @param string $encryption_profile_name
+ *   The ID of the encryption profile to validate.
+ *
+ * @return array
+ *   An error of validation errors for the given encryption profile.
  */
 function drush_encrypt_validate_profile($encryption_profile_name) {
   $output = array();
