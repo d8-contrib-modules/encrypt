@@ -40,7 +40,7 @@ class EncryptionProfileForm extends EntityForm {
    *
    * @var bool
    */
-  protected $edit_confirmed = FALSE;
+  protected $editConfirmed = FALSE;
 
   /**
    * The original encryption profile.
@@ -106,7 +106,7 @@ class EncryptionProfileForm extends EntityForm {
     $encryption_profile = $this->entity;
 
     $disabled = FALSE;
-    if ($this->operation == "edit" && !$this->edit_confirmed) {
+    if ($this->operation == "edit" && !$this->editConfirmed) {
       $disabled = TRUE;
     }
 
@@ -278,10 +278,10 @@ class EncryptionProfileForm extends EntityForm {
 
     // Check if we can enable full profile editing,
     // after explicit user confirmation.
-    if ($this->operation == "edit" && $this->edit_confirmed != TRUE) {
+    if ($this->operation == "edit" && $this->editConfirmed != TRUE) {
       $form_state->setRebuild();
       if ($form_state->getValue('confirm_edit') == TRUE) {
-        $this->edit_confirmed = TRUE;
+        $this->editConfirmed = TRUE;
         return;
       }
     }

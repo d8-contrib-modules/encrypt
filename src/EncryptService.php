@@ -74,7 +74,7 @@ class EncryptService implements EncryptServiceInterface {
   /**
    * Determines whether the input is valid for encryption / decryption.
    *
-   * @param $text
+   * @param string $text
    *   The text to encrypt / decrypt.
    * @param \Drupal\encrypt\Entity\EncryptionProfile $encryption_profile
    *   The encryption profile to validate.

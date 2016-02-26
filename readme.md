@@ -18,6 +18,34 @@ The service is configured through the settings form, found at
 It requires a key, which is provided by the Key module. To manage keys, visit 
 `admin/config/system/key`.
 
+## Best practices
+
+In order to provide real security, it is highly recommended to follow these 
+best practices:
+
+### Encryption method
+
+Use a high-quality, modern security library for encrypting your data.
+The Real AES module (https://www.drupal.org/project/real_aes) provides 
+integration with the recommended Defuse PHP Encryption library.
+
+Read the README.txt document provided by the Real AES module for detailed 
+security information and best practices, as well as further background 
+information.
+
+### Key
+
+Be sure to use a key value with an appropriately secure size (at least 128 bits)
+and decent quality (i.e. proper randomness).
+
+Make sure to store your keys in an appropriately secure place. Keep your keys
+out of the database, out of the web root and on a different server, if possible.
+
+The "Configuration" key provider (as defined by the Key module) should only be
+used for testing purposes. Never use this key provider in a production 
+environment, or any environment where security is required. 
+
+
 ## Use of Services
 
 After configuring the service, the service provides the ability to encrypt and 
@@ -42,7 +70,8 @@ If you don't want to use the "use" statement in the examples above, you can
 use the following code to retrieve the encryption profile:
 
 ```
-$encryption_profile = \Drupal::service('entity.manager')->getStorage('encryption_profile')->load($instance_id);
+$encryption_profile = \Drupal::service('entity.manager')
+  ->getStorage('encryption_profile')->load($instance_id);
 ```
 
 ## Writing your own EncryptionMethod plugin
