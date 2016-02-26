@@ -15,7 +15,7 @@ use Drupal\encrypt\Plugin\EncryptionMethodPluginFormInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class EncryptionProfileForm.
+ * Provides the form to add / edit an EncryptionProfile entity.
  *
  * @package Drupal\encrypt\Form
  */
@@ -230,6 +230,9 @@ class EncryptionProfileForm extends EntityForm {
 
   /**
    * Update the EncryptionMethod plugin.
+   *
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
    */
   protected function updateEncryptionMethod(FormStateInterface $form_state) {
     /* @var $encryption_profile \Drupal\encrypt\Entity\EncryptionProfile */
@@ -266,6 +269,7 @@ class EncryptionProfileForm extends EntityForm {
       return;
     }
 
+    // If the encryption method contains a config form, validate it as well.
     if ($plugin = $this->entity->getEncryptionMethod()) {
       if ($plugin instanceof EncryptionMethodPluginFormInterface) {
         $plugin_form_state = $this->createPluginFormState($form_state);
@@ -290,6 +294,7 @@ class EncryptionProfileForm extends EntityForm {
     /** @var \Drupal\encrypt\Entity\EncryptionConfiguration $entity */
     $this->entity = $this->buildEntity($form, $form_state);
 
+    // Validate the EncryptionProfile entity.
     $errors = $this->entity->validate();
     if ($errors) {
       $form_state->setErrorByName('encryption_key', implode(';', $errors));
