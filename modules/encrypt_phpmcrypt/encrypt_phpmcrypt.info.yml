@@ -1,0 +1,10 @@
+name: Encrypt - PHP mcrypt extension Encryption
+description: 'PHP Mcrypt Extension Encryption for the Encrypt module.'
+core: 8.x
+package: Encryption
+dependencies:
+  - encrypt
+  - composer_manager
+version: 8.x-1.0
+project: encrypt_phpmcrypt
+type: module

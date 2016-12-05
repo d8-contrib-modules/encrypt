@@ -1,0 +1,8 @@
+{
+  "name": "drupal/encrypt_phpmcrypt",
+  "description": "Integrates the php mcrypt encryption plugin into Drupal",
+  "type": "drupal-module",
+  "require": {
+    "ext-mcrypt": "*"
+  }
+}
